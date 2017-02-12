@@ -28,7 +28,7 @@ tba = tbapy.TBA('frc254:cheesy_arena:v2.2')
 or
 
 ```py
-tba = TBA('woodie_flowers:scouting-system:5')
+tba = tbapy.TBA('woodie_flowers:scouting-system:5')
 ```
 
 The Blue Alliance's API requires that all applications identify themselves when retrieving data.
