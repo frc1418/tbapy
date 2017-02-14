@@ -13,7 +13,7 @@ First, install the module:
 
     pip install tbapy
 
-Then, to use these functions, you must import the `tba` module:
+Then, to use these functions, you must import the `tbapy` module:
 
 ```py
 import tbapy
