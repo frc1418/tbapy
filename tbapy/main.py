@@ -30,13 +30,13 @@ class TBA:
         return self.fetch('team/%s' % self.team_key(team))
 
     def team_events(self, team, year):
-        return self.fetch('team/%s/%s' % (self.team_key(team), year))
+        return self.fetch('team/%s/%s/events' % (self.team_key(team), year))
 
     def team_awards(self, team, event=None):
         if event:
             return self.fetch('team/%s/event/%s/awards' % (self.team_key(team), event))
         else:
-            return self.fetch('team/%s' % self.team_key(team))
+            return self.fetch('team/%s/awards' % self.team_key(team))
 
     def team_matches(self, team, event):
         return self.fetch('team/%s/event/%s/matches' % (self.team_key(team), event))
