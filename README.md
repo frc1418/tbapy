@@ -49,6 +49,7 @@ Replace `tba` with the object name if you changed it above.
 * `tba.team_history_districts(team)` - Get the districts that a team has been part of over the years.
 * `tba.event_list([year])` - Get a list of all events. _OPTIONAL: Include a year to get events from that year. Otherwise the current year's events will be returned._
 * `tba.event(event)` - Get data about an event.
+* `tba.event_teams(event)` - Get a list of teams at an event.
 * `tba.event_stats(event)` - Get statistics from an event.
 * `tba.event_rankings(event)` - Get the rankings at an event.
 * `tba.event_awards(event)` - Get the awards from an event.
