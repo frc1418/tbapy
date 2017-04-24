@@ -36,6 +36,7 @@ The Blue Alliance's API requires that all applications identify themselves when 
 
 ## Retrieval Functions
 Replace `tba` with the object name if you changed it above.
+* `tba.status()` - Get the status of TBA datafeeds
 * `tba.teams(page)` - Get a list of of valid teams, where `page * 500` is the starting team number.
 * `tba.team(team)` - Get a team's data. `team` can be an integer team number of a string-form `'frc####'` identifier.
 * `tba.team_events(team, year)` - Get a list of events a team has been to.

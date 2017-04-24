@@ -12,6 +12,9 @@ class TBA:
     def fetch(self, url):
         return requests.get(self.URL_PRE + url, headers={'X-TBA-App-Id': self.app_id}).json()
 
+    def status(self):
+        return self.fetch('status')
+
     def team_key(self, identifier):
         """
         Take raw team number or string key and return string key.
