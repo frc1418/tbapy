@@ -2,16 +2,24 @@
 
 [![PyPI version](https://badge.fury.io/py/tbapy.svg)](https://badge.fury.io/py/tbapy)
 
-Unofficial Python library to get data from The Blue Alliance.
+Unofficial Python library to get data from The Blue Alliance. Uses v3 of the TBA API.
 
 This library returns JSON-parsed data fetched from The Blue Alliance's API.
 
 Compatible with Python 2 and 3.
 
+## Breaking changes between v0.x and v1.x
+Version v1.x uses TBA API v3 for data gathering. The API has several major changes which are reflected in this library. Below are a list of potentially breaking changes that were made to this library for compatibility with API v3. If you need to use the old API, simply install and use an older version.
+* Since API v3 now needs an `X-TBA-Auth-Key` header instead of `X-TBA-App-Id`, thus you will need to pass an auth key when instantiating the library rather than an app ID as previously.
+* Team History requests have been renamed to reflect the change in TBA's naming of those requests. `team_history_events`, `team_history_awards`, `team_history_robots`, and `team_history_districts` have been renamed to `team_events`, `team_awards`, `team_robots`, and `team_districts`.
+* `event_stats` is now `event_insights`.
+* `district_points` has been removed. Data on rankings at a single event can now be fetched via the `event` request through its `detail_type` parameter, as aforementioned. `district_rankings` will continue to be used to return holistic ranking data.
+* `event_list` has been renamed to `events`.
+
 ## Setup
 First, install the module:
 
-    pip install tbapy
+    pip3 install tbapy
 
 Then, to use these functions, you must import the `tbapy` module:
 
@@ -19,19 +27,13 @@ Then, to use these functions, you must import the `tbapy` module:
 import tbapy
 ```
 
-Before using the library, you must instantiate its class, providing your application's ID in the format `author:application:version`, for example:
+Before using the library, you must instantiate its class, for example:
 
 ```py
-tba = tbapy.TBA('frc254:cheesy_arena:v2.2')
+tba = tbapy.TBA('key')
 ```
 
-or
-
-```py
-tba = tbapy.TBA('woodie_flowers:scouting-system:5')
-```
-
-The Blue Alliance's API requires that all applications identify themselves when retrieving data.
+The Blue Alliance's API requires that all applications identify themselves with an auth key when retrieving data. To obtain an auth key, visit TBA's [Account page](https://www.thebluealliance.com/account).
 
 
 ## Retrieval Functions
