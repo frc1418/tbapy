@@ -3,8 +3,8 @@
 from setuptools import setup
 
 setup(name='tbapy',
-      version='0.1.1',
-      description='Unofficial Python library to get data from The Blue Alliance.',
+      version='1.0.0',
+      description='Python library to get data from The Blue Alliance API v3.',
       url='https://github.com/frc1418/tbapy',
       author='FRC Team 1418, Erik Boesen',
       author_email='robotics1418@gmail.com',

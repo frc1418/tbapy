@@ -1,3 +1,3 @@
-# tbapy - Unofficial Python library to get data from The Blue Alliance.
+# tbapy - Python library for getting data from The Blue Alliance.
 
 from .main import *
