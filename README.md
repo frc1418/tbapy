@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/tbapy.svg)](https://badge.fury.io/py/tbapy)
 
-Python library to get data from The Blue Alliance. Uses v3 of the TBA API.
+Python library to get data from The Blue Alliance. _Uses v3 of the TBA API._
 
 This library returns JSON data fetched from The Blue Alliance's API.
 
@@ -10,6 +10,7 @@ Compatible with Python 2 and 3.
 
 ## Breaking changes between v0.x and v1.x
 Version v1.x uses TBA API v3 for data gathering. The API has several major changes which are reflected in this library. Below are a list of potentially breaking changes that were made to this library for compatibility with API v3. If you need to use the old API, simply install and use an older version.
+* The library now functions based on objects rather than raw JSON data. If you still want to use raw JSON data, append `.json` to the end of the object variable. So, if you had a `Team` object named `my_team`, `my_team.json` would give you the team data as a raw dictionary. Otherwise, you'll need to switch to using dot notation for the most part and treating the data appropriately.
 * Since API v3 now needs an `X-TBA-Auth-Key` header instead of `X-TBA-App-Id`, thus you will need to pass an auth key when instantiating the library rather than an app ID as previously.
 * Team History requests have been renamed to reflect the change in TBA's naming of those requests. `team_history_events()`, `team_history_awards()`, `team_history_robots()`, and `team_history_districts()` have been renamed to `team_events()`, `team_awards()`, `team_robots()`, and `team_districts()`.
 * The `year` parameter in `team_media()` is no longer optional.

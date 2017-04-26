@@ -1,4 +1,5 @@
 from requests import get
+from .models import *
 
 
 class TBA:
@@ -19,7 +20,7 @@ class TBA:
         """
         self.auth_key = auth_key
 
-    def fetch(self, url):
+    def _fetch(self, url):
         """
         Helper method: fetch data from given URL on TBA's API.
 
@@ -31,8 +32,9 @@ class TBA:
         """
         Take raw team number or string key and return string key.
 
-        We recommend passing an integer, just because it's cleaner.
-        But either way works.
+        Used by all team-related methods to support either an integer team number or team key being passed.
+
+        (We recommend passing an integer, just because it's cleaner. But whatever works.)
 
         :param identifier: int team number or str 'frc####'
         """
@@ -42,7 +44,7 @@ class TBA:
         """
         Return TBA API status information.
         """
-        return self.fetch('status')
+        return self._fetch('status')
 
     # TODO: Allow automatic fetching of entire team list.
     def teams(self, page, year=None, keys=False):
@@ -55,14 +57,14 @@ class TBA:
         """
         if year:
             if keys:
-                return self.fetch('teams/%s/%s/keys' % (year, page))
+                return self._fetch('teams/%s/%s/keys' % (year, page))
             else:
-                return self.fetch('teams/%s/%s' % (year, page))
+                return [Team(raw) for raw in self._fetch('teams/%s/%s' % (year, page))]
         else:
             if keys:
-                return self.fetch('teams/%s/keys' % page)
+                return self._fetch('teams/%s/keys' % page)
             else:
-                return self.fetch('teams/%s' % page)
+                return [Team(raw) for raw in self._fetch('teams/%s' % page)]
 
     def team(self, team, simple=False):
         """
@@ -71,9 +73,9 @@ class TBA:
         :param simple: Fetch simpler data. Use if you only need basic data about the team.
         """
         if simple:
-            return self.fetch('team/%s/simple' % self.team_key(team))
+            return Team(self._fetch('team/%s/simple' % self.team_key(team)))
         else:
-            return self.fetch('team/%s' % self.team_key(team))
+            return Team(self._fetch('team/%s' % self.team_key(team)))
 
     def team_events(self, team, year=None, keys=False):
         """
@@ -85,14 +87,14 @@ class TBA:
         """
         if year:
             if keys:
-                return self.fetch('team/%s/%s/events/keys' % (self.team_key(team), year))
+                return self._fetch('team/%s/%s/events/keys' % (self.team_key(team), year))
             else:
-                return self.fetch('team/%s/%s/events' % (self.team_key(team), year))
+                return [Event(raw) for raw in self._fetch('team/%s/%s/events' % (self.team_key(team), year))]
         else:
             if keys:
-                return self.fetch('team/%s/events/keys' % self.team_key(team))
+                return self._fetch('team/%s/events/keys' % self.team_key(team))
             else:
-                return self.fetch('team/%s/events' % self.team_key(team))
+                return [Event(raw) for raw in self._fetch('team/%s/events' % self.team_key(team))]
 
     def team_awards(self, team, year=None, event=None):
         """
@@ -103,12 +105,12 @@ class TBA:
         :param event: Event to get awards from.
         """
         if event:
-            return self.fetch('team/%s/event/%s/awards' % (self.team_key(team), event))
+            return [Award(raw) for raw in self._fetch('team/%s/event/%s/awards' % (self.team_key(team), event))]
         else:
             if year:
-                return self.fetch('team/%s/awards/%s' % (self.team_key(team), year))
+                return [Award(raw) for raw in self._fetch('team/%s/awards/%s' % (self.team_key(team), year))]
             else:
-                return self.fetch('team/%s/awards' % self.team_key(team))
+                return [Award(raw) for raw in self._fetch('team/%s/awards' % self.team_key(team))]
 
     def team_matches(self, team, event=None, year=None, keys=False):
         """
@@ -121,14 +123,14 @@ class TBA:
         """
         if event:
             if keys:
-                return self.fetch('team/%s/event/%s/matches/keys' % (self.team_key(team), event))
+                return self._fetch('team/%s/event/%s/matches/keys' % (self.team_key(team), event))
             else:
-                return self.fetch('team/%s/event/%s/matches' % (self.team_key(team), event))
+                return [Match(raw) for raw in self._fetch('team/%s/event/%s/matches' % (self.team_key(team), event))]
         elif year:
             if keys:
-                return self.fetch('team/%s/matches/%s/keys' % (self.team_key(team), year))
+                return self._fetch('team/%s/matches/%s/keys' % (self.team_key(team), year))
             else:
-                return self.fetch('team/%s/matches/%s' % (self.team_key(team), year))
+                return [Match(raw) for raw in self._fetch('team/%s/matches/%s' % (self.team_key(team), year))]
 
     def team_years(self, team):
         """
@@ -136,7 +138,7 @@ class TBA:
 
         :param team: Key for team to get data about.
         """
-        return self.fetch('team/%s/years_participated' % self.team_key(team))
+        return self._fetch('team/%s/years_participated' % self.team_key(team))
 
     def team_media(self, team, year):
         """
@@ -145,7 +147,7 @@ class TBA:
         :param team: Team to get media of.
         :param year: Year to get media from.
         """
-        return self.fetch('team/%s/media/%s' % (self.team_key(team), year))
+        return [Media(raw) for raw in self._fetch('team/%s/media/%s' % (self.team_key(team), year))]
 
     def team_robots(self, team):
         """
@@ -153,7 +155,7 @@ class TBA:
 
         :param team: Key for team whose robots you want data on.
         """
-        return self.fetch('team/%s/robots' % self.team_key(team))
+        return [Robot(raw) for raw in self._fetch('team/%s/robots' % self.team_key(team))]
 
     def team_districts(self, team):
         """
@@ -161,7 +163,7 @@ class TBA:
 
         :param team: Team to get data on.
         """
-        return self.fetch('team/%s/districts' % self.team_key(team))
+        return [District(raw) for raw in self._fetch('team/%s/districts' % self.team_key(team))]
 
     def team_social_media(self, team):
         """
@@ -169,7 +171,7 @@ class TBA:
 
         :param team: Team to get data on.
         """
-        return self.fetch('team/%s/social_media')
+        return [Profile(raw) for raw in self._fetch('team/%s/social_media')]
 
     def events(self, year, keys=False):
         """
@@ -179,9 +181,9 @@ class TBA:
         :param keys: Get only keys of the events rather than full data.
         """
         if keys:
-            return self.fetch('events/%s/keys' % year)
+            return self._fetch('events/%s/keys' % year)
         else:
-            return self.fetch('events/%s' % year)
+            return [Event(raw) for raw in self._fetch('events/%s' % year)]
 
     def event(self, event, simple=False):
         """
@@ -193,9 +195,9 @@ class TBA:
         :param simple: Fetch simpler data about event. Use this if you don't need the extra information provided by a standard request.
         """
         if simple:
-            return self.fetch('event/%s/simple' % event)
+            return Event(self._fetch('event/%s/simple' % event))
         else:
-            return self.fetch('event/%s' % event)
+            return Event(self._fetch('event/%s' % event))
 
     def event_alliances(self, event):
         """
@@ -203,7 +205,7 @@ class TBA:
 
         :param event: Key of event to get data on.
         """
-        return self.fetch('event/%s/alliances' % event)
+        return [Alliance(raw) for raw in self._fetch('event/%s/alliances' % event)]
 
     def event_district_points(self, event):
         """
@@ -211,7 +213,7 @@ class TBA:
 
         :param event: Key of event to get data on.
         """
-        return self.fetch('event/%s/district_points' % event)
+        return DistrictPoints(self._fetch('event/%s/district_points' % event))
 
     def event_insights(self, event):
         """
@@ -219,7 +221,7 @@ class TBA:
 
         :param event: Key of event to get data on.
         """
-        return self.fetch('event/%s/insights' % event)
+        return Insights(self._fetch('event/%s/insights' % event))
 
     def event_oprs(self, event):
         """
@@ -227,7 +229,7 @@ class TBA:
 
         :param event: Key of event to get data on.
         """
-        return self.fetch('event/%s/oprs' % event)
+        return OPRs(self._fetch('event/%s/oprs' % event))
 
     def event_predictions(self, event):
         """
@@ -235,7 +237,7 @@ class TBA:
 
         :param event: Key of event to get data on.
         """
-        return self.fetch('event/%s/predictions' % event)
+        return Predictions(self._fetch('event/%s/predictions' % event))
 
     def event_rankings(self, event):
         """
@@ -243,7 +245,7 @@ class TBA:
 
         :param event: Key of event to get data on.
         """
-        return self.fetch('event/%s/rankings' % event)
+        return Rankings(self._fetch('event/%s/rankings' % event))
 
     def event_teams(self, event, keys=False):
         """
@@ -253,9 +255,9 @@ class TBA:
         :param keys: Return list of team keys only rather than full data on every team.
         """
         if keys:
-            return self.fetch('event/%s/teams/keys' % event)
+            return self._fetch('event/%s/teams/keys' % event)
         else:
-            return self.fetch('event/%s/teams' % event)
+            return [Team(raw) for raw in self._fetch('event/%s/teams' % event)]
 
     def event_awards(self, event):
         """
@@ -263,7 +265,7 @@ class TBA:
 
         :param event: Event key to get data on.
         """
-        return self.fetch('event/%s/awards' % event)
+        return [Award(raw) for raw in self._fetch('event/%s/awards' % event)]
 
     def event_matches(self, event, keys=False):
         """
@@ -273,9 +275,9 @@ class TBA:
         :param keys: Return list of match keys only rather than full data on every match.
         """
         if keys:
-            return self.fetch('event/%s/matches/keys' % event)
+            return self._fetch('event/%s/matches/keys' % event)
         else:
-            return self.fetch('event/%s/matches' % event)
+            return [Match(raw) for raw in self._fetch('event/%s/matches' % event)]
 
     def match(self, key=None, year=None, event=None, type='qm', number=None, round=None, simple=False):
         """
@@ -292,9 +294,9 @@ class TBA:
         :param simple: Set to True to get simpler match data. Recommended unless you need the data given in the full request.
         """
         if key:
-            return self.fetch('match/%s' % key)
+            return Match(self._fetch('match/%s' % key))
         else:
-            return self.fetch('match/%s%s_%s%s%s' % (year if not event[0].isdigit() else '', event, type, number, ('m%s' % round) if not type == 'qm' else ''))
+            return Match(self._fetch('match/%s%s_%s%s%s' % (year if not event[0].isdigit() else '', event, type, number, ('m%s' % round) if not type == 'qm' else '')))
 
     def districts(self, year):
         """
@@ -302,7 +304,7 @@ class TBA:
 
         :param year: Year from which you want to get active districts.
         """
-        return self.fetch('districts/%s' % year)
+        return [District(raw) for raw in self._fetch('districts/%s' % year)]
 
     def district_events(self, district, keys=False):
         """
@@ -312,9 +314,9 @@ class TBA:
         :param keys: Return list of event keys only rather than full data on every event.
         """
         if keys:
-            return self.fetch('district/%s/events/keys' % district)
+            return self._fetch('district/%s/events/keys' % district)
         else:
-            return self.fetch('district/%s/events' % district)
+            return [Event(raw) for raw in self._fetch('district/%s/events' % district)]
 
     def district_rankings(self, district):
         """
@@ -322,7 +324,7 @@ class TBA:
 
         :param district: Key of district to get rankings of.
         """
-        return self.fetch('district/%s/rankings' % district)
+        return [DistrictRanking(raw) for raw in self._fetch('district/%s/rankings' % district)]
 
     def district_teams(self, district, year, keys=False):
         """
@@ -333,10 +335,9 @@ class TBA:
         :param keys: Return list of team keys only rather than full data on every team.
         """
         if keys:
-            return self.fetch('district/%s/%s/teams/keys' % (district, year))
+            return self._fetch('district/%s/%s/teams/keys' % (district, year))
         else:
-            return self.fetch('district/%s/%s/teams' % (district, year))
+            return [Team(raw) for raw in self._fetch('district/%s/%s/teams' % (district, year))]
 
     # TODO: Suggest media request.
     # TODO: Use .format() instead of % notation.
-    # TODO: Return data in object form rather than as JSON.
