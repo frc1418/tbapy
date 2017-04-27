@@ -1,9 +1,17 @@
+class _base_model_class(dict):
+    def __getitem__(self, item):
+        try:
+            return getattr(self, item)
+        except AttributeError:
+            raise KeyError(item)
+
 def _create_model_class(class_name, *json_keys):
     def init(self, json):
-    self.json = json
-    for key in json_keys:
-    setattr(self, key, json[key])
-    return type(class_name, (), {'__init__': init})
+        self.json = json
+        self.update(json)
+        for key in json_keys:
+            setattr(self, key, json[key])
+    return type(class_name, (_base_model_class,), {'__init__': init})
 
 Team = _create_model_class('Team', 'address', 'city', 'country', 'gmaps_place_id', 'gmaps_url', 'home_championship', 'key', 'lat', 'lng',
                            'location_name', 'motto', 'name', 'nickname', 'postal_code', 'rookie_year', 'state_prov', 'team_number', 'website')
