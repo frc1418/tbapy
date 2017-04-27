@@ -10,7 +10,7 @@ Compatible with Python 2 and 3.
 
 ## Breaking changes between v0.x and v1.x
 Version v1.x uses TBA API v3 for data gathering. The API has several major changes which are reflected in this library. Below are a list of potentially breaking changes that were made to this library for compatibility with API v3. If you need to use the old API, simply install and use an older version.
-* The library now functions based on objects rather than raw JSON data. If you still want to use raw JSON data, append `.json` to the end of the object variable. So, if you had a `Team` object named `my_team`, `my_team.json` would give you the team data as a raw dictionary. Otherwise, you'll need to switch to using dot notation for the most part and treating the data appropriately.
+* The library now functions based on objects rather than raw JSON data. Dictionary syntax (ie `team['team_number']`) will work, but object syntax (`team.team_number`) is recommended. If you want to use raw JSON data, append `.json` to the end of the object variable. So, if you had a `Team` object named `my_team`, `my_team.json` would give you the team data as a raw dictionary. Otherwise, you'll need to switch to using dot notation for the most part and treating the data appropriately.
 * Since API v3 now needs an `X-TBA-Auth-Key` header instead of `X-TBA-App-Id`, thus you will need to pass an auth key when instantiating the library rather than an app ID as previously.
 * Team History requests have been renamed to reflect the change in TBA's naming of those requests. `team_history_events()`, `team_history_awards()`, `team_history_robots()`, and `team_history_districts()` have been renamed to `team_events()`, `team_awards()`, `team_robots()`, and `team_districts()`.
 * The `year` parameter in `team_media()` is no longer optional.
@@ -72,7 +72,7 @@ See `example.py` for several usage examples.
 Documentation for The Blue Alliance's API can be found [here](https://www.thebluealliance.com/apidocs).
 
 ## Authors
-This software was created and is maintained by [Erik Boesen](https://github.com/ErikBoesen) with [Team 1418](https://github.com/frc1418).
+This software was created and is maintained by [Erik Boesen](https://github.com/ErikBoesen) with [Team 1418](https://github.com/frc1418). Additional contributions made by [Ian Weiss](https://github.com/endreman0) with [Team 4131](https://github.com/FRC4131).
 
 ## License
 This software is protected under the [MIT License](LICENSE).
