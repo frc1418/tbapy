@@ -25,6 +25,7 @@ class TBA:
         Helper method: fetch data from given URL on TBA's API.
 
         :param url: URL string to get data from.
+        :return: Requested data in JSON format.
         """
         return get(self.URL_PRE + url, headers={'X-TBA-Auth-Key': self.auth_key}).json()
 
@@ -37,14 +38,17 @@ class TBA:
         (We recommend passing an integer, just because it's cleaner. But whatever works.)
 
         :param identifier: int team number or str 'frc####'
+        :return: string team key in format 'frc####'
         """
         return (identifier if type(identifier) == str else 'frc%s' % identifier)
 
     def status(self):
         """
-        Return TBA API status information.
+        Get TBA API status information.
+
+        :return: Data on current status of the TBA API as Status object.
         """
-        return self._fetch('status')
+        return Status(self._fetch('status'))
 
     # TODO: Allow automatic fetching of entire team list.
     def teams(self, page, year=None, keys=False):
@@ -54,6 +58,7 @@ class TBA:
         :param page: Page of teams to view. Each page contains 500 teams.
         :param year: Pass this parameter to view teams from a specific year.
         :param keys: Set to true if you only want the teams' keys rather than full data on them.
+        :return: List of Team objects or string keys.
         """
         if year:
             if keys:
@@ -71,6 +76,7 @@ class TBA:
         Get data on a single specified team.
 
         :param simple: Fetch simpler data. Use if you only need basic data about the team.
+        :return: Team object with data on specified team.
         """
         if simple:
             return Team(self._fetch('team/%s/simple' % self.team_key(team)))
@@ -84,6 +90,7 @@ class TBA:
         :param team: Team to get events for.
         :param year: Year to get events from.
         :param keys: Get just the keys of the events. Set to True if you only need the keys of each event and not their full data.
+        :return: List of strings or Teams
         """
         if year:
             if keys:
@@ -103,6 +110,7 @@ class TBA:
         :param team: Team to get awards of.
         :param year: Year to get awards from.
         :param event: Event to get awards from.
+        :return: List of Award objects
         """
         if event:
             return [Award(raw) for raw in self._fetch('team/%s/event/%s/awards' % (self.team_key(team), event))]
@@ -120,6 +128,7 @@ class TBA:
         :param year: Year to get matches from.
         :param event: Event to get matches from.
         :param keys: Only fetch match keys rather than their full data.
+        :return: List of string keys or Match objects
         """
         if event:
             if keys:
@@ -137,6 +146,7 @@ class TBA:
         Get years during which a team participated in FRC.
 
         :param team: Key for team to get data about.
+        :return: List of integer years in which team participated.
         """
         return self._fetch('team/%s/years_participated' % self.team_key(team))
 
@@ -146,6 +156,7 @@ class TBA:
 
         :param team: Team to get media of.
         :param year: Year to get media from.
+        :return: List of Media objects.
         """
         return [Media(raw) for raw in self._fetch('team/%s/media/%s' % (self.team_key(team), year))]
 
@@ -154,6 +165,7 @@ class TBA:
         Get data about a team's robots.
 
         :param team: Key for team whose robots you want data on.
+        :return: List of Robot objects
         """
         return [Robot(raw) for raw in self._fetch('team/%s/robots' % self.team_key(team))]
 
@@ -162,6 +174,7 @@ class TBA:
         Get districts a team has competed in.
 
         :param team: Team to get data on.
+        :return: List of District objects.
         """
         return [District(raw) for raw in self._fetch('team/%s/districts' % self.team_key(team))]
 
@@ -170,6 +183,7 @@ class TBA:
         Get team's social media profiles linked on their TBA page.
 
         :param team: Team to get data on.
+        :return: List of Profile objects.
         """
         return [Profile(raw) for raw in self._fetch('team/%s/social_media')]
 
@@ -179,6 +193,7 @@ class TBA:
 
         :param year: Year to get events from.
         :param keys: Get only keys of the events rather than full data.
+        :return: List of string event keys of Event objects.
         """
         if keys:
             return self._fetch('events/%s/keys' % year)
@@ -193,6 +208,7 @@ class TBA:
 
         :param event: Key of event for which you desire data.
         :param simple: Fetch simpler data about event. Use this if you don't need the extra information provided by a standard request.
+        :return: A single Event object.
         """
         if simple:
             return Event(self._fetch('event/%s/simple' % event))
@@ -204,6 +220,7 @@ class TBA:
         Get information about alliances at event.
 
         :param event: Key of event to get data on.
+        :return: List of Alliance objects.
         """
         return [Alliance(raw) for raw in self._fetch('event/%s/alliances' % event)]
 
@@ -212,6 +229,7 @@ class TBA:
         Get district point information about an event.
 
         :param event: Key of event to get data on.
+        :return: Single DistrictPoints object.
         """
         return DistrictPoints(self._fetch('event/%s/district_points' % event))
 
@@ -220,6 +238,7 @@ class TBA:
         Get insights about an event.
 
         :param event: Key of event to get data on.
+        :return: Single Insights object.
         """
         return Insights(self._fetch('event/%s/insights' % event))
 
@@ -228,6 +247,7 @@ class TBA:
         Get OPRs from an event.
 
         :param event: Key of event to get data on.
+        :return: Single OPRs object.
         """
         return OPRs(self._fetch('event/%s/oprs' % event))
 
@@ -236,6 +256,7 @@ class TBA:
         Get predictions for matches during an event.
 
         :param event: Key of event to get data on.
+        :return: Single Predictions object.
         """
         return Predictions(self._fetch('event/%s/predictions' % event))
 
@@ -244,6 +265,7 @@ class TBA:
         Get rankings from an event.
 
         :param event: Key of event to get data on.
+        :return: Single Rankings object.
         """
         return Rankings(self._fetch('event/%s/rankings' % event))
 
@@ -253,6 +275,7 @@ class TBA:
 
         :param event: Event key to get data on.
         :param keys: Return list of team keys only rather than full data on every team.
+        :return: List of string keys or Team objects.
         """
         if keys:
             return self._fetch('event/%s/teams/keys' % event)
@@ -264,6 +287,7 @@ class TBA:
         Get list of awards presented at an event.
 
         :param event: Event key to get data on.
+        :return: List of Award objects.
         """
         return [Award(raw) for raw in self._fetch('event/%s/awards' % event)]
 
@@ -273,6 +297,7 @@ class TBA:
 
         :param event: Event key to get data on.
         :param keys: Return list of match keys only rather than full data on every match.
+        :return: List of string keys or Match objects.
         """
         if keys:
             return self._fetch('event/%s/matches/keys' % event)
@@ -292,6 +317,7 @@ class TBA:
         :param number: Match number. For example, for qualifier 32, you'd pass 32. For Semifinal 2 round 3, you'd pass 2.
         :param round: For playoff matches, you will need to specify a round.
         :param simple: Set to True to get simpler match data. Recommended unless you need the data given in the full request.
+        :return: A single Match object.
         """
         if key:
             return Match(self._fetch('match/%s' % key))
@@ -303,6 +329,7 @@ class TBA:
         Return a list of districts active.
 
         :param year: Year from which you want to get active districts.
+        :return: A list of District objects.
         """
         return [District(raw) for raw in self._fetch('districts/%s' % year)]
 
@@ -312,6 +339,7 @@ class TBA:
 
         :param district: Key of district whose events you want.
         :param keys: Return list of event keys only rather than full data on every event.
+        :return: List of string keys or Event objects.
         """
         if keys:
             return self._fetch('district/%s/events/keys' % district)
@@ -323,6 +351,7 @@ class TBA:
         Return data about rankings in a given district.
 
         :param district: Key of district to get rankings of.
+        :return: List of DistrictRanking objects.
         """
         return [DistrictRanking(raw) for raw in self._fetch('district/%s/rankings' % district)]
 
@@ -333,6 +362,7 @@ class TBA:
         :param district: Key for the district to get teams in.
         :param year: Year from which to get teams.
         :param keys: Return list of team keys only rather than full data on every team.
+        :return: List of string keys or Team objects.
         """
         if keys:
             return self._fetch('district/%s/%s/teams/keys' % (district, year))
