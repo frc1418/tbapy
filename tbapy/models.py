@@ -4,13 +4,15 @@ class _base_model_class(dict):
         self.update(json)
         self.update(self.__dict__)
         self.__dict__ = self
-        
+
     def __repr__(self):
-        contents = {k: self[k] for k in self if k != 'json'} # Exclude :json: from the string
+        contents = {k: self[k] for k in self if k != 'json'}  # Exclude :json: from the string
         return '%s(%s)' % (self.__class__.__name__, dict.__repr__(contents))
+
 
 def _model_class(class_name):
     return type(class_name, (_base_model_class,), {})
+
 
 Team = _model_class('Team')
 Event = _model_class('Event')
@@ -27,3 +29,4 @@ OPRs = _model_class('OPRs')
 Prediction = _model_class('Prediction')
 Rankings = _model_class('Rankings')
 DistrictRanking = _model_class('DistrictRanking')
+Status = _model_class('Status')
