@@ -94,9 +94,9 @@ class TBA:
         """
         if year:
             if keys:
-                return self._fetch('team/%s/%s/events/keys' % (self.team_key(team), year))
+                return self._fetch('team/%s/events/%s/keys' % (self.team_key(team), year))
             else:
-                return [Event(raw) for raw in self._fetch('team/%s/%s/events' % (self.team_key(team), year))]
+                return [Event(raw) for raw in self._fetch('team/%s/events/%s' % (self.team_key(team), year))]
         else:
             if keys:
                 return self._fetch('team/%s/events/keys' % self.team_key(team))
