@@ -20,6 +20,8 @@ print('Team 1418 is/was in the %s district in the most recent year of competitio
 print('The second qual match at the 2017 CHS District Championship was predicted to start at Unix Time %s.' % match.predicted_time)
 print('In 2016, team 148 was in %d events: %s.' % (len(events), ', '.join(event.event_code for event in events)))
 print('Team 4131\'s robots: ' + ', '.join('%s (%d)' % (robot.robot_name, robot.year) for robot in robots))
+print('Robots have attribute name:', hasattr(robots[0], 'name'))
+print('Robots have attribute robot_name:', hasattr(robots[0], 'robot_name'))
 print()
 
 print('-' * 8 + ' Dictionary Syntax' + '-' * 8)
@@ -28,6 +30,8 @@ print('Team 1418 is/was in the %s district in the most recent year of competitio
 print('The second qual match at the 2017 CHS District Championship was predicted to start at Unix Time %s.' % match['predicted_time'])
 print('In 2016, team 148 was in %d events: %s.' % (len(events), ', '.join(event['event_code'] for event in events)))
 print('Team 4131\'s robots: ' + ', '.join('%s (%d)' % (robot['robot_name'], robot['year']) for robot in robots))
+print('Robots have attribute name:', 'name' in robots[0])
+print('Robots have attribute robot_name:', 'robot_name' in robots[0])
 print()
 
 print('-' * 5 + ' .json Dictionary Syntax' + '-' * 5)
@@ -36,3 +40,5 @@ print('Team 1418 is/was in the %s district in the most recent year of competitio
 print('The second qual match at the 2017 CHS District Championship was predicted to start at Unix Time %s.' % match.json['predicted_time'])
 print('In 2016, team 148 was in %d events: %s.' % (len(events), ', '.join(event.json['event_code'] for event in events)))
 print('Team 4131\'s robots: ' + ', '.join('%s (%d)' % (robot.json['robot_name'], robot.json['year']) for robot in robots))
+print('Robots have attribute name:', 'name' in robots[0].json)
+print('Robots have attribute robot_name:', 'robot_name' in robots[0].json)
