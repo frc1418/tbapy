@@ -187,16 +187,19 @@ class TBA:
         """
         return [Profile(raw) for raw in self._fetch('team/%s/social_media')]
 
-    def events(self, year, keys=False):
+    def events(self, year, keys=False, simple=False):
         """
         Get a list of events in a given year.
 
         :param year: Year to get events from.
         :param keys: Get only keys of the events rather than full data.
+        :param simple: Get the simple model of the events rather than full data.
         :return: List of string event keys of Event objects.
         """
         if keys:
             return self._fetch('events/%s/keys' % year)
+        elif simple:
+            return self._fetch('events/%s/simple' % year)
         else:
             return [Event(raw) for raw in self._fetch('events/%s' % year)]
 
