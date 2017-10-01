@@ -20,6 +20,10 @@ class TBA:
         """
         self.auth_key = auth_key
 
+        status = self.status()
+        if 'Error' in status:
+            raise APIKeyError(status['Error'])
+
     def _fetch(self, url):
         """
         Helper method: fetch data from given URL on TBA's API.
@@ -374,3 +378,6 @@ class TBA:
 
     # TODO: Suggest media request.
     # TODO: Use .format() instead of % notation.
+
+class APIKeyError(Exception):
+    pass
