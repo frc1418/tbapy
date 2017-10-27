@@ -53,6 +53,7 @@ Replace `tba` with the object name if you changed it above.
 * `tba.team_social_media(team)` - Get data on a team's social media profiles.
 * `tba.events([year], [keys], [simple])` - Get a list of all events. _OPTIONAL: Include a year to get events from that year. Otherwise the current year's events will be returned. You may also specify `keys` or 'simple' as True to get only the keys or simple model of the events rather than full data, respectively. If both 'keys' and 'simple' are true, then it will return keys._
 * `tba.event(event, [simple])` - Get data about an event. _OPTIONAL: Specify `simple` as `True` to get simpler data on an event. Recommended unless you need the extra data._
+* `tba.event_rankings(event)` - Gets a list of team rankings at a given event.
 * `tba.event_alliances(event)` - Get sophisticated data on alliances at a given event.
 * `tba.event_district_points(event)` - Get sophisticated data on district points at a given event.
 * `tba.event_insights(event)` - Get insight data on a given event.
