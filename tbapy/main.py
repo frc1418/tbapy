@@ -367,9 +367,9 @@ class TBA:
         :return: List of string keys or Team objects.
         """
         if keys:
-            return self._get('district/{district_key}/teams/keys'.format(district_key=district))
+            return self._get('district/%s/teams/keys' % district)
         else:
-            return [Team(raw) for raw in self._get('district/{district_key}/teams'.format(district_key=district))]
+            return [Team(raw) for raw in self._get('district/%s/teams' % district)]
 
     # TODO: Suggest media request.
     # TODO: Use .format() instead of % notation.
