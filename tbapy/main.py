@@ -360,7 +360,7 @@ class TBA:
 
     def district_teams(self, district, keys=False):
         """
-        Get list of teams in the given district in a certain year.
+        Get list of teams in the given district.
 
         :param district: Key for the district to get teams in.
         :param keys: Return list of team keys only rather than full data on every team.
