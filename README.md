@@ -66,7 +66,7 @@ Replace `tba` with the object name if you changed it above.
 * `tba.districts(year)` - Get a list of all districts that exist(ed) in a given year.
 * `tba.district_events(district, [keys])` - Get list of events in a district. _OPTIONAL: Specify `keys` as `True` to only fetch a list of event keys rather than their full data._
 * `tba.district_rankings(district)` - Get the rankings in a district.
-* `tba.district_teams(district, year, [keys])` - Get a list of the teams in a district. _OPTIONAL: Specify `keys` as `True` to only fetch a list of team keys rather than their full data._
+* `tba.district_teams(district, [keys])` - Get a list of the teams in a district. _OPTIONAL: Specify `keys` as `True` to only fetch a list of team keys rather than their full data._
 
 See `example.py` for several usage examples.
 
