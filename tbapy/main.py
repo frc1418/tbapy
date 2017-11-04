@@ -358,19 +358,18 @@ class TBA:
         """
         return [DistrictRanking(raw) for raw in self._get('district/%s/rankings' % district)]
 
-    def district_teams(self, district, year, keys=False):
+    def district_teams(self, district, keys=False):
         """
-        Get list of teams in the given district in a certain year.
+        Get list of teams in the given district.
 
         :param district: Key for the district to get teams in.
-        :param year: Year from which to get teams.
         :param keys: Return list of team keys only rather than full data on every team.
         :return: List of string keys or Team objects.
         """
         if keys:
-            return self._get('district/%s/%s/teams/keys' % (district, year))
+            return self._get('district/%s/teams/keys' % district)
         else:
-            return [Team(raw) for raw in self._get('district/%s/%s/teams' % (district, year))]
+            return [Team(raw) for raw in self._get('district/%s/teams' % district)]
 
     # TODO: Suggest media request.
     # TODO: Use .format() instead of % notation.
