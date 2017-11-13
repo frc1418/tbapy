@@ -78,10 +78,8 @@ class TBA:
         :param simple: GET simpler data. Use if you only need basic data about the team.
         :return: Team object with data on specified team.
         """
-        if simple:
-            return Team(self._get('team/%s/simple' % self.team_key(team)))
-        else:
-            return Team(self._get('team/%s' % self.team_key(team)))
+        return Team(self._get('team/%s%s' % (self.team_key(team), '/simple' if simple else '')))
+
 
     def team_events(self, team, year=None, keys=False):
         """
@@ -198,10 +196,8 @@ class TBA:
         """
         if keys:
             return self._get('events/%s/keys' % year)
-        elif simple:
-            return self._get('events/%s/simple' % year)
         else:
-            return [Event(raw) for raw in self._get('events/%s' % year)]
+            return [Event(raw) for raw in self._get('events/%s%s' % (year, '/simple' if simple else ''))]
 
     def event(self, event, simple=False):
         """
@@ -213,10 +209,7 @@ class TBA:
         :param simple: Get simpler data about event. Use this if you don't need the extra information provided by a standard request.
         :return: A single Event object.
         """
-        if simple:
-            return Event(self._get('event/%s/simple' % event))
-        else:
-            return Event(self._get('event/%s' % event))
+        return Event(self._get('event/%s%s' % (event, '/simple' if simple else '')))
 
     def event_alliances(self, event):
         """
@@ -294,18 +287,19 @@ class TBA:
         """
         return [Award(raw) for raw in self._get('event/%s/awards' % event)]
 
-    def event_matches(self, event, keys=False):
+    def event_matches(self, event, keys=False, simple=False):
         """
         Get list of matches played at an event.
 
         :param event: Event key to get data on.
         :param keys: Return list of match keys only rather than full data on every match.
+        :param simple: Return simpler data on matches. Recommended if you don't need the data provided through a standard request.
         :return: List of string keys or Match objects.
         """
         if keys:
             return self._get('event/%s/matches/keys' % event)
         else:
-            return [Match(raw) for raw in self._get('event/%s/matches' % event)]
+            return [Match(raw) for raw in self._get('event/%s/matches%s' % (event, '/simple' if simple else ''))]
 
     def match(self, key=None, year=None, event=None, type='qm', number=None, round=None, simple=False):
         """
@@ -325,7 +319,7 @@ class TBA:
         if key:
             return Match(self._get('match/%s' % key))
         else:
-            return Match(self._get('match/%s%s_%s%s%s' % (year if not event[0].isdigit() else '', event, type, number, ('m%s' % round) if not type == 'qm' else '')))
+            return Match(self._get('match/%s%s_%s%s%s%s' % (year if not event[0].isdigit() else '', event, type, number, ('m%s' % round) if not type == 'qm' else ''), '/simple' if simple else ''))
 
     def districts(self, year):
         """
