@@ -176,7 +176,7 @@ class TBA:
         """
         return [District(raw) for raw in self._get('team/%s/districts' % self.team_key(team))]
 
-    def team_social_media(self, team):
+    def team_profiles(self, team):
         """
         Get team's social media profiles linked on their TBA page.
 
