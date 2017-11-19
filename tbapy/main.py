@@ -75,7 +75,8 @@ class TBA:
     def team(self, team, simple=False):
         """
         Get data on a single specified team.
-
+        
+        :param team: Team to get data for.
         :param simple: GET simpler data. Use if you only need basic data about the team.
         :return: Team object with data on specified team.
         """
