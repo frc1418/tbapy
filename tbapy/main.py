@@ -183,7 +183,7 @@ class TBA:
         :param team: Team to get data on.
         :return: List of Profile objects.
         """
-        return [Profile(raw) for raw in self._get('team/%s/social_media') % self.team_key(team)]
+        return [Profile(raw) for raw in self._get('team/%s/social_media' % self.team_key(team))]
 
     def events(self, year, keys=False, simple=False):
         """
