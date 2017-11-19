@@ -29,7 +29,8 @@ class TBA:
         """
         return get(self.URL_PRE + url, headers={'X-TBA-Auth-Key': self.auth_key}).json()
 
-    def team_key(self, identifier):
+    @staticmethod
+    def team_key(identifier):
         """
         Take raw team number or string key and return string key.
 
@@ -40,7 +41,7 @@ class TBA:
         :param identifier: int team number or str 'frc####'
         :return: string team key in format 'frc####'
         """
-        return (identifier if type(identifier) == str else 'frc%s' % identifier)
+        return identifier if type(identifier) == str else 'frc%s' % identifier
 
     def status(self):
         """
