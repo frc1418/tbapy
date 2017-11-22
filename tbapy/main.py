@@ -152,15 +152,16 @@ class TBA:
         """
         return self._get('team/%s/years_participated' % self.team_key(team))
 
-    def team_media(self, team, year):
+    def team_media(self, team, year=None, tag=None):
         """
         Get media for a given team.
 
         :param team: Team to get media of.
         :param year: Year to get media from.
+        :param tag: Get only media with a given tag.
         :return: List of Media objects.
         """
-        return [Media(raw) for raw in self._get('team/%s/media/%s' % (self.team_key(team), year))]
+        return [Media(raw) for raw in self._get('team/%s/media%s%s' % (self.team_key(team), ('/tag/%s' % tag) if tag else '', ('/%s' % year) if year else ''))]
 
     def team_robots(self, team):
         """
