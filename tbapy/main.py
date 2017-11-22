@@ -47,9 +47,9 @@ class TBA:
         """
         Get TBA API status information.
 
-        :return: Data on current status of the TBA API as Status object.
+        :return: Data on current status of the TBA API as APIStatus object.
         """
-        return Status(self._get('status'))
+        return APIStatus(self._get('status'))
 
     # TODO: Allow automatic getting of entire team list.
     def teams(self, page, year=None, simple=False, keys=False):
@@ -188,6 +188,16 @@ class TBA:
         :return: List of Profile objects.
         """
         return [Profile(raw) for raw in self._get('team/%s/social_media' % self.team_key(team))]
+
+    def team_status(self, team, event):
+        """
+        Get status of a team at an event.
+
+        :param team: Team whose status to get.
+        :param event: Event team is at.
+        :return: Status object.
+        """
+        return Status(self._get('team/%s/event/%s/status' % (self.team_key(team), event)))
 
     def events(self, year, simple=False, keys=False):
         """
