@@ -52,12 +52,13 @@ class TBA:
         return Status(self._get('status'))
 
     # TODO: Allow automatic getting of entire team list.
-    def teams(self, page, year=None, keys=False):
+    def teams(self, page, year=None, simple=False, keys=False):
         """
         Get list of teams.
 
         :param page: Page of teams to view. Each page contains 500 teams.
         :param year: Pass this parameter to view teams from a specific year.
+        :param simple: Get only vital data.
         :param keys: Set to true if you only want the teams' keys rather than full data on them.
         :return: List of Team objects or string keys.
         """
@@ -65,30 +66,30 @@ class TBA:
             if keys:
                 return self._get('teams/%s/%s/keys' % (year, page))
             else:
-                return [Team(raw) for raw in self._get('teams/%s/%s' % (year, page))]
+                return [Team(raw) for raw in self._get('teams/%s/%s%s' % (year, page, '/simple' if simple else ''))]
         else:
             if keys:
                 return self._get('teams/%s/keys' % page)
             else:
-                return [Team(raw) for raw in self._get('teams/%s' % page)]
+                return [Team(raw) for raw in self._get('teams/%s%s' % (page, '/simple' if simple else ''))]
 
     def team(self, team, simple=False):
         """
         Get data on a single specified team.
-        
+
         :param team: Team to get data for.
-        :param simple: GET simpler data. Use if you only need basic data about the team.
+        :param simple: Get only vital data.
         :return: Team object with data on specified team.
         """
         return Team(self._get('team/%s%s' % (self.team_key(team), '/simple' if simple else '')))
 
-
-    def team_events(self, team, year=None, keys=False):
+    def team_events(self, team, year=None, simple=False, keys=False):
         """
         Get team events a team has participated in.
 
         :param team: Team to get events for.
         :param year: Year to get events from.
+        :param simple: Get only vital data.
         :param keys: Get just the keys of the events. Set to True if you only need the keys of each event and not their full data.
         :return: List of strings or Teams
         """
@@ -96,12 +97,12 @@ class TBA:
             if keys:
                 return self._get('team/%s/events/%s/keys' % (self.team_key(team), year))
             else:
-                return [Event(raw) for raw in self._get('team/%s/events/%s' % (self.team_key(team), year))]
+                return [Event(raw) for raw in self._get('team/%s/events/%s%s' % (self.team_key(team), year, '/simple' if simple else ''))]
         else:
             if keys:
                 return self._get('team/%s/events/keys' % self.team_key(team))
             else:
-                return [Event(raw) for raw in self._get('team/%s/events' % self.team_key(team))]
+                return [Event(raw) for raw in self._get('team/%s/events%s' % (self.team_key(team), '/simple' if simple else ''))]
 
     def team_awards(self, team, year=None, event=None):
         """
@@ -120,26 +121,27 @@ class TBA:
             else:
                 return [Award(raw) for raw in self._get('team/%s/awards' % self.team_key(team))]
 
-    def team_matches(self, team, event=None, year=None, keys=False):
+    def team_matches(self, team, event=None, year=None, simple=False, keys=False):
         """
         Get list of matches team has participated in.
 
         :param team: Team to get matches of.
         :param year: Year to get matches from.
         :param event: Event to get matches from.
+        :param simple: Get only vital data.
         :param keys: Only get match keys rather than their full data.
-        :return: List of string keys or Match objects
+        :return: List of string keys or Match objects.
         """
         if event:
             if keys:
                 return self._get('team/%s/event/%s/matches/keys' % (self.team_key(team), event))
             else:
-                return [Match(raw) for raw in self._get('team/%s/event/%s/matches' % (self.team_key(team), event))]
+                return [Match(raw) for raw in self._get('team/%s/event/%s/matches%s' % (self.team_key(team), event, '/simple' if simple else ''))]
         elif year:
             if keys:
                 return self._get('team/%s/matches/%s/keys' % (self.team_key(team), year))
             else:
-                return [Match(raw) for raw in self._get('team/%s/matches/%s' % (self.team_key(team), year))]
+                return [Match(raw) for raw in self._get('team/%s/matches/%s%s' % (self.team_key(team), year, '/simple' if simple else ''))]
 
     def team_years(self, team):
         """
@@ -187,14 +189,14 @@ class TBA:
         """
         return [Profile(raw) for raw in self._get('team/%s/social_media' % self.team_key(team))]
 
-    def events(self, year, keys=False, simple=False):
+    def events(self, year, simple=False, keys=False):
         """
         Get a list of events in a given year.
 
         :param year: Year to get events from.
         :param keys: Get only keys of the events rather than full data.
-        :param simple: Get the simple model of the events rather than full data.
-        :return: List of string event keys of Event objects.
+        :param simple: Get only vital data.
+        :return: List of string event keys or Event objects.
         """
         if keys:
             return self._get('events/%s/keys' % year)
@@ -208,7 +210,7 @@ class TBA:
         More specific data (typically obtained with the detail_type URL parameter) can be obtained with event_alliances(), event_district_points(), event_insights(), event_oprs(), event_predictions(), and event_rankings().
 
         :param event: Key of event for which you desire data.
-        :param simple: Get simpler data about event. Use this if you don't need the extra information provided by a standard request.
+        :param simple: Get only vital data.
         :return: A single Event object.
         """
         return Event(self._get('event/%s%s' % (event, '/simple' if simple else '')))
@@ -267,18 +269,19 @@ class TBA:
         """
         return Rankings(self._get('event/%s/rankings' % event))
 
-    def event_teams(self, event, keys=False):
+    def event_teams(self, event, simple=False, keys=False):
         """
         Get list of teams at an event.
 
         :param event: Event key to get data on.
+        :param simple: Get only vital data.
         :param keys: Return list of team keys only rather than full data on every team.
         :return: List of string keys or Team objects.
         """
         if keys:
             return self._get('event/%s/teams/keys' % event)
         else:
-            return [Team(raw) for raw in self._get('event/%s/teams' % event)]
+            return [Team(raw) for raw in self._get('event/%s/teams%s' % (event, '/simple' if simple else ''))]
 
     def event_awards(self, event):
         """
@@ -289,13 +292,13 @@ class TBA:
         """
         return [Award(raw) for raw in self._get('event/%s/awards' % event)]
 
-    def event_matches(self, event, keys=False, simple=False):
+    def event_matches(self, event, simple=False, keys=False):
         """
         Get list of matches played at an event.
 
         :param event: Event key to get data on.
         :param keys: Return list of match keys only rather than full data on every match.
-        :param simple: Return simpler data on matches. Recommended if you don't need the data provided through a standard request.
+        :param simple: Get only vital data.
         :return: List of string keys or Match objects.
         """
         if keys:
@@ -315,7 +318,7 @@ class TBA:
         :param type: One of 'qm' (qualifier match), 'qf' (quarterfinal), 'sf' (semifinal), 'f' (final). If unspecified, 'qm' will be assumed.
         :param number: Match number. For example, for qualifier 32, you'd pass 32. For Semifinal 2 round 3, you'd pass 2.
         :param round: For playoff matches, you will need to specify a round.
-        :param simple: Set to True to get simpler match data. Recommended unless you need the data given in the full request.
+        :param simple: Get only vital data.
         :return: A single Match object.
         """
         if key:
@@ -332,18 +335,19 @@ class TBA:
         """
         return [District(raw) for raw in self._get('districts/%s' % year)]
 
-    def district_events(self, district, keys=False):
+    def district_events(self, district, simple=False, keys=False):
         """
         Return list of events in a given district.
 
         :param district: Key of district whose events you want.
+        :param simple: Get only vital data.
         :param keys: Return list of event keys only rather than full data on every event.
         :return: List of string keys or Event objects.
         """
         if keys:
             return self._get('district/%s/events/keys' % district)
         else:
-            return [Event(raw) for raw in self._get('district/%s/events' % district)]
+            return [Event(raw) for raw in self._get('district/%s/events%s' % (district, '/simple' if simple else ''))]
 
     def district_rankings(self, district):
         """
@@ -354,11 +358,12 @@ class TBA:
         """
         return [DistrictRanking(raw) for raw in self._get('district/%s/rankings' % district)]
 
-    def district_teams(self, district, keys=False):
+    def district_teams(self, district, simple=False, keys=False):
         """
         Get list of teams in the given district.
 
         :param district: Key for the district to get teams in.
+        :param simple: Get only vital data.
         :param keys: Return list of team keys only rather than full data on every team.
         :return: List of string keys or Team objects.
         """
@@ -366,6 +371,3 @@ class TBA:
             return self._get('district/%s/teams/keys' % district)
         else:
             return [Team(raw) for raw in self._get('district/%s/teams' % district)]
-
-    # TODO: Suggest media request.
-    # TODO: Use .format() instead of % notation.
