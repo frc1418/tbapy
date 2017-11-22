@@ -35,34 +35,37 @@ The Blue Alliance's API requires that all applications identify themselves with 
 
 
 ## Retrieval Functions
-Replace `tba` with the object name if you changed it above.
-* `tba.status()` - Get the status of TBA datafeeds
-* `tba.teams(page, [year], [keys])` - Get a list of of valid teams, where `page * 500` is the starting team number. _OPTIONAL: specify a year to get teams from and set `keys` to `True` to retrieve only the keys of the team rather than its full data._
-* `tba.team(team, [simple])` - Get a team's data. `team` can be an integer team number of a string-form `'frc####'` identifier. _OPTIONAL: Specify `simple` as `True` to get simplified data (recommended unless you need full information)._
-* `tba.team_events(team, [year], [keys])` - Get a list of events a team has been to. _OPTIONAL: Specify `keys` as `True` to get only the keys of the events and not their full data._
-* `tba.team_awards(team, [event/year])` - Get a list of the team's awards. _OPTIONAL: Specify an event or year that you want awards from. Otherwise all a team's awards will be returned._
-* `tba.team_matches(team, [event/year], [keys])` - Get a list of a team's matches at an event. _OPTIONAL: Specify `keys` as `True` to only fetch match keys rather than their full data._
+You may specify `simple=True` to get only vital data on some models or lists of models, or you may specify `keys=True` to get a list of the keys for a list rather than full data on each model. It is recommended to use these options if you do not need full data.
+
+Some requests support `year` and other optional parameters, which are recommended to use to narrow down your results.
+* `tba.status()` - Get TBA's status.
+* `tba.teams(page, [year], [simple/keys])` - Get a list of of valid teams, where `page * 500` is the starting team number.
+* `tba.team(team, [simple])` - Get a team's data. `team` can be an integer team number of a string-form `'frc####'` identifier.
+* `tba.team_events(team, [year], [simple/keys])` - Get a list of events a team has been to.
+* `tba.team_awards(team, [event/year])` - Get a list of the team's awards.
+* `tba.team_matches(team, [event/year], [simple/keys])` - Get a list of a team's matches at an event.
 * `tba.team_years(team)` - Get a list of years the team was active in FRC.
-* `tba.team_media(team, year)` - Get team media. Specify a year to get media from.
+* `tba.team_media(team, [year], [tag])` - Get team media. Specify a year to get media from or a tag or both.
 * `tba.team_robots(team)` - Get data about a team's robots.
 * `tba.team_districts(team)` - Get the districts that a team has been part of over the years.
-* `tba.team_social_media(team)` - Get data on a team's social media profiles.
-* `tba.events([year], [keys], [simple])` - Get a list of all events. _OPTIONAL: Include a year to get events from that year. Otherwise the current year's events will be returned. You may also specify `keys` or 'simple' as True to get only the keys or simple model of the events rather than full data, respectively. If both 'keys' and 'simple' are true, then it will return keys._
-* `tba.event(event, [simple])` - Get data about an event. _OPTIONAL: Specify `simple` as `True` to get simpler data on an event. Recommended unless you need the extra data._
+* `tba.team_profiles(team)` - Get data on a team's media profiles.
+* `tba.team_status(team, event)` - Get a team's status at an event.
+* `tba.events([year], [simple/keys])` - Get a list of all events.
+* `tba.event(event, [simple])` - Get data about an event.
 * `tba.event_rankings(event)` - Gets a list of team rankings at a given event.
 * `tba.event_alliances(event)` - Get sophisticated data on alliances at a given event.
 * `tba.event_district_points(event)` - Get sophisticated data on district points at a given event.
 * `tba.event_insights(event)` - Get insight data on a given event.
 * `tba.event_oprs(event)` - Get sophisticated data on alliances at a given event.
 * `tba.event_predictions(event)` - Get predicted scores for a given event.
-* `tba.event_teams(event)` - Get a list of teams at an event.
+* `tba.event_teams(event, [simple/keys])` - Get a list of teams at an event.
 * `tba.event_awards(event)` - Get the awards from an event.
-* `tba.event_matches(event)` - Get a match list of an event.
-* `tba.match([key], [year], [event], [type], [number], [round], [simple])` - Get data about a match. You may either pass the match's `key` directly, or pass `year`, `event`, `type`, `match` (the match number), and `round` if applicable (playoffs only). The event year may be specified as part of the event key or specified in the `year` parameter. _OPTIONAL: Specify `simple` as `True` to get simpler data on the match. Recommended unless you need the extra information._
+* `tba.event_matches(event, [simple/keys])` - Get a match list of an event.
+* `tba.match([key], [year], [event], [type], [number], [round], [simple])` - Get data about a match. You may either pass the match's `key` directly, or pass `year`, `event`, `type`, `match` (the match number), and `round` if applicable (playoffs only). The event year may be specified as part of the event key or specified in the `year` parameter.
 * `tba.districts(year)` - Get a list of all districts that exist(ed) in a given year.
-* `tba.district_events(district, [keys])` - Get list of events in a district. _OPTIONAL: Specify `keys` as `True` to only fetch a list of event keys rather than their full data._
+* `tba.district_events(district, [simple/keys])` - Get list of events in a district.
 * `tba.district_rankings(district)` - Get the rankings in a district.
-* `tba.district_teams(district, [keys])` - Get a list of the teams in a district. _OPTIONAL: Specify `keys` as `True` to only fetch a list of team keys rather than their full data._
+* `tba.district_teams(district, [simple/keys])` - Get a list of the teams in a district.
 
 See `example.py` for several usage examples.
 
