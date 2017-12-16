@@ -1,8 +1,7 @@
-# tbapy
+# tbapy [![PyPI version](https://badge.fury.io/py/tbapy.svg)](https://badge.fury.io/py/tbapy)
+_1418 TBA Libraries_ // [**Python**](https://github.com/frc1418/tbapy) // [Go](https://github.com/frc1418/tbago) // [Ruby](https://github.com/frc1418/tbarb)
 
-[![PyPI version](https://badge.fury.io/py/tbapy.svg)](https://badge.fury.io/py/tbapy)
-
-Python library to get data from The Blue Alliance. _Uses v3 of the TBA API._
+> Python library for interfacing with [The Blue Alliance](https://thebluealliance.com) [API](https://thebluealliance.com/apidocs) (v3).
 
 ## Breaking changes between v0.x and v1.x
 Version v1.x uses TBA API v3 for data gathering. The API has several major changes which are reflected in this library. Below are a list of potentially breaking changes that were made to this library for compatibility with API v3. If you need to use the old API, simply install and use an older version.
