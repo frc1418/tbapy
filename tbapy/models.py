@@ -15,7 +15,7 @@ def _model_class(class_name):
     return type(class_name, (_base_model_class,), {})
 
 
-APIStatus = _model_class('Status')
+APIStatus = _model_class('APIStatus')
 Team = _model_class('Team')
 Event = _model_class('Event')
 Match = _model_class('Match')
@@ -31,4 +31,4 @@ OPRs = _model_class('OPRs')
 Prediction = _model_class('Prediction')
 Rankings = _model_class('Rankings')
 DistrictRanking = _model_class('DistrictRanking')
-Status = _model_class('TeamStatus')
+Status = _model_class('Status')
