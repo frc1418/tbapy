@@ -333,7 +333,7 @@ class TBA:
         :return: A single Match object.
         """
         if key:
-            return Match(self._get('match/%s' % key))
+            return Match(self._get('match/%s%s' % (key, '/simple' if simple else '')))
         else:
             return Match(self._get('match/%s%s_%s%s%s%s' % (year if not event[0].isdigit() else '', event, type, number, ('m%s' % round) if not type == 'qm' else ''), '/simple' if simple else ''))
 
