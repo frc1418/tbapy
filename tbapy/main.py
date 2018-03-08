@@ -335,7 +335,12 @@ class TBA:
         if key:
             return Match(self._get('match/%s%s' % (key, '/simple' if simple else '')))
         else:
-            return Match(self._get('match/%s%s_%s%s%s%s' % (year if not event[0].isdigit() else '', event, type, number, ('m%s' % round) if not type == 'qm' else ''), '/simple' if simple else ''))
+            return Match(self._get('match/{year}{event}_{type}{number}{round}{simple}'.format(year=year if not event[0].isdigit() else '',
+                                                                                              event=event,
+                                                                                              type=type,
+                                                                                              number=number,
+                                                                                              round=('m%s' % round) if not type == 'qm' else '',
+                                                                                              simple='/simple' if simple else '')))
 
     def districts(self, year):
         """
