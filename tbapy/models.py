@@ -10,6 +10,9 @@ class _base_model_class(dict):
     def json(self):
         return dict.__repr__(self)
 
+    def raw(self):
+        return dict(self)
+
 
 def _model_class(class_name):
     return type(class_name, (_base_model_class,), {})
