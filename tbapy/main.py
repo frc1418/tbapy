@@ -1,4 +1,5 @@
-from requests import get
+from requests import get, post
+from hashlib import md5
 from .models import *
 
 
@@ -9,16 +10,25 @@ class TBA:
     Contains methods for interacting with The Blue Alliance.
     """
 
-    URL_PRE = 'https://www.thebluealliance.com/api/v3/'
+    READ_URL_PRE = 'https://www.thebluealliance.com/api/v3/'
+    WRITE_URL_PRE = 'https://www.thebluealliance.com/api/trusted/v1/'
     auth_key = ''
+    auth_id = None
+    auth_secret = None
+    auth_event_key = ''
 
-    def __init__(self, auth_key):
+    def __init__(self, auth_key, auth_id=None, auth_secret=None, auth_event_key=''):
         """
         Store auth key so we can reuse it as many times as we make a request.
 
         :param auth_key: Your application authorization key, obtainable at https://www.thebluealliance.com/account.
+        :param auth_id: Your event authorization ID, obtainable at https://www.thebluealliance.com/request/apiwrite
+        :param auth_secret: Your event authorization secret, obtainable at https://www.thebluealliance.com/request/apiwrite
         """
         self.auth_key = auth_key
+        self.auth_id = auth_id
+        self.auth_secret = auth_secret
+        self.auth_event_key = auth_event_key
 
     def _get(self, url):
         """
@@ -27,7 +37,17 @@ class TBA:
         :param url: URL string to get data from.
         :return: Requested data in JSON format.
         """
-        return get(self.URL_PRE + url, headers={'X-TBA-Auth-Key': self.auth_key}).json()
+        return get(self.READ_URL_PRE + url, headers={'X-TBA-Auth-Key': self.auth_key}).json()
+
+    def _post(self, url, data, auth_sig):
+        """
+        Helper method: POST data to a given URL on TBA's API.
+
+        :param url: URL string to post data to.
+        :return: Requests Response object.
+
+        """
+        return post(self.WRITE_URL_PRE + url, data=data, headers={'X-TBA-Auth-Id': self.auth_id, 'X-TBA-Auth-Sig': auth_sig})
 
     @staticmethod
     def team_key(identifier):
@@ -387,3 +407,94 @@ class TBA:
             return self._get('district/%s/teams/keys' % district)
         else:
             return [Team(raw) for raw in self._get('district/%s/teams' % district)]
+
+    def update_trusted(self, auth_id, auth_secret, auth_event_key):
+        """
+        Set Trusted API ID and Secret and the event key they are assigned to.
+
+        :param auth_id: Your event authorization ID, obtainable at https://www.thebluealliance.com/request/apiwrite
+        :param auth_secret: Your event authorization secret, obtainable at https://www.thebluealliance.com/request/apiwrite
+        """
+        self.auth_id = auth_id
+        self.auth_secret = auth_secret
+        self.auth_event_key = auth_event_key
+
+    def update_event_info(self, data):
+        """
+        Update an event's info on The Blue Alliance.
+
+        :param data: Dictionary of data to update the event with.
+        """
+        url = "event/{}/info/update".format(self.auth_event_key)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        return self._post(url, data, md5(concat).hexdigest())
+
+    def update_event_alliances(self, data):
+        """
+        Update an event's alliances on The Blue Alliance.
+
+        :param data: List of lists of alliances in frc#### string format.
+        """
+        url = "event/{}/alliance_selections/update".format(self.auth_event_key)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        return self._post(url, data, md5(concat).hexdigest())
+
+    def update_event_awards(self, data):
+        """
+        Update an event's awards on The Blue Alliance.
+
+        :param data: List of Dictionaries of award winners. Each dictionary should have a name_str for the award name, team_key in frc#### string format, and the awardee for any awards given to individuals. The last two can be null
+        """
+        url = "event/{}/awards/update".format(self.auth_event_key)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        return self._post(url, data, md5(concat).hexdigest())
+
+    def update_event_matches(self, data):
+        """
+        Update an event's matches on The Blue Alliance.
+
+        :param data: List of Dictionaries. More info about the match data can be found in the API docs.
+        """
+        url = "event/{}/matches/update".format(self.auth_event_key)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        return self._post(url, data, md5(concat).hexdigest())
+
+    def delete_event_matches(self, data):
+        """
+        Delete an event's matches on The Blue Alliance.
+
+        :param data: List of match keys to delete
+        """
+        url = "event/{}/matches/delete".format(self.auth_event_key)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        return self._post(url, data, md5(concat).hexdigest())
+
+    def update_event_rankings(self, data):
+        """
+        Update an event's rankings on The Blue Alliance.
+
+        :param data: Dictionary of breakdowns and rankings. Rankings are a list of dictionaries.
+        """
+        url = "event/{}/rankings/update".format(self.auth_event_key)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        return self._post(url, data, md5(concat).hexdigest())
+
+    def add_match_videos(self, data):
+        """
+        Add match videos to the respective match pages of an event on The Blue Alliance.
+
+        :param data: Dictionary of partial match keys to youtube video ids.
+        """
+        url = "event/{}/match_videos/add".format(self.auth_event_key)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        return self._post(url, data, md5(concat).hexdigest())
+
+    def add_event_videos(self, data):
+        """
+        Add videos to an event's media tab on The Blue Alliance.
+
+        :param data: Dictionary of partial match keys to youtube video ids.
+        """
+        url = "event/{}/media/add".format(self.auth_event_key)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        return self._post(url, data, md5(concat).hexdigest())
