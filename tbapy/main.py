@@ -426,9 +426,9 @@ class TBA:
 
         :param data: Dictionary of data to update the event with.
         """
-        url = "event/{}/info/update".format(self.auth_event_key)
+        url = "event/%s/info/update" % self.auth_event_key
         data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + data
         return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
 
     def update_event_alliances(self, data):
@@ -437,9 +437,9 @@ class TBA:
 
         :param data: List of lists of alliances in frc#### string format.
         """
-        url = "event/{}/alliance_selections/update".format(self.auth_event_key)
+        url = "event/%s/alliance_selections/update" % self.auth_event_key
         data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + data
         return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
 
     def update_event_awards(self, data):
@@ -448,9 +448,9 @@ class TBA:
 
         :param data: List of Dictionaries of award winners. Each dictionary should have a name_str for the award name, team_key in frc#### string format, and the awardee for any awards given to individuals. The last two can be null
         """
-        url = "event/{}/awards/update".format(self.auth_event_key)
+        url = "event/%s/awards/update" % self.auth_event_key
         data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + data
         return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
 
     def update_event_matches(self, data):
@@ -459,9 +459,9 @@ class TBA:
 
         :param data: List of Dictionaries. More info about the match data can be found in the API docs.
         """
-        url = "event/{}/matches/update".format(self.auth_event_key)
+        url = "event/%s/matches/update" % self.auth_event_key
         data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + data
         return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
 
     def delete_event_matches(self, data):
@@ -470,9 +470,9 @@ class TBA:
 
         :param data: List of match keys to delete
         """
-        url = "event/{}/matches/delete".format(self.auth_event_key)
+        url = "event/%s/matches/delete" % self.auth_event_key
         data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + data
         return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
 
     def update_event_rankings(self, data):
@@ -481,9 +481,9 @@ class TBA:
 
         :param data: Dictionary of breakdowns and rankings. Rankings are a list of dictionaries.
         """
-        url = "event/{}/rankings/update".format(self.auth_event_key)
+        url = "event/%s/rankings/update" % self.auth_event_key
         data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + data
         return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
 
     def add_match_videos(self, data):
@@ -492,9 +492,9 @@ class TBA:
 
         :param data: Dictionary of partial match keys to youtube video ids.
         """
-        url = "event/{}/match_videos/add".format(self.auth_event_key)
+        url = "event/%s/match_videos/add" % self.auth_event_key
         data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + data
         return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
 
     def add_event_videos(self, data):
@@ -503,7 +503,7 @@ class TBA:
 
         :param data: Dictionary of partial match keys to youtube video ids.
         """
-        url = "event/{}/media/add".format(self.auth_event_key)
+        url = "event/{}/media/add" % self.auth_event_key
         data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + str(data)
+        concat = self.auth_secret + "/api/trusted/v1/" + url + data
         return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
