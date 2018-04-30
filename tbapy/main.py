@@ -40,15 +40,16 @@ class TBA:
         """
         return get(self.READ_URL_PRE + url, headers={'X-TBA-Auth-Key': self.auth_key}).json()
 
-    def _post(self, url, data, auth_sig):
+    def _post(self, url, data):
         """
         Helper method: POST data to a given URL on TBA's API.
 
         :param url: URL string to post data to.
+        :pararm data: Dumped data to post.
         :return: Requests Response object.
 
         """
-        return post(self.WRITE_URL_PRE + url, data=data, headers={'X-TBA-Auth-Id': self.auth_id, 'X-TBA-Auth-Sig': auth_sig})
+        return post(self.WRITE_URL_PRE + url % self.auth_event_key, data=data, headers={'X-TBA-Auth-Id': self.auth_id, 'X-TBA-Auth-Sig': md5((self.auth_secret + "/api/trusted/v1/" + url + data).encode("utf-8")).hexdigest()})
 
     @staticmethod
     def team_key(identifier):
@@ -426,10 +427,7 @@ class TBA:
 
         :param data: Dictionary of data to update the event with.
         """
-        url = "event/%s/info/update" % self.auth_event_key
-        data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + data
-        return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
+        return self._post(url, json.dumps(data))
 
     def update_event_alliances(self, data):
         """
@@ -437,10 +435,7 @@ class TBA:
 
         :param data: List of lists of alliances in frc#### string format.
         """
-        url = "event/%s/alliance_selections/update" % self.auth_event_key
-        data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + data
-        return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
+        return self._post(url, json.dumps(data))
 
     def update_event_awards(self, data):
         """
@@ -448,10 +443,7 @@ class TBA:
 
         :param data: List of Dictionaries of award winners. Each dictionary should have a name_str for the award name, team_key in frc#### string format, and the awardee for any awards given to individuals. The last two can be null
         """
-        url = "event/%s/awards/update" % self.auth_event_key
-        data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + data
-        return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
+        return self._post(url, json.dumps(data))
 
     def update_event_matches(self, data):
         """
@@ -459,10 +451,7 @@ class TBA:
 
         :param data: List of Dictionaries. More info about the match data can be found in the API docs.
         """
-        url = "event/%s/matches/update" % self.auth_event_key
-        data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + data
-        return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
+        return self._post(url, json.dumps(data))
 
     def delete_event_matches(self, data):
         """
@@ -470,10 +459,7 @@ class TBA:
 
         :param data: List of match keys to delete
         """
-        url = "event/%s/matches/delete" % self.auth_event_key
-        data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + data
-        return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
+        return self._post(url, json.dumps(data))
 
     def update_event_rankings(self, data):
         """
@@ -481,10 +467,7 @@ class TBA:
 
         :param data: Dictionary of breakdowns and rankings. Rankings are a list of dictionaries.
         """
-        url = "event/%s/rankings/update" % self.auth_event_key
-        data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + data
-        return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
+        return self._post(url, json.dumps(data))
 
     def add_match_videos(self, data):
         """
@@ -492,10 +475,7 @@ class TBA:
 
         :param data: Dictionary of partial match keys to youtube video ids.
         """
-        url = "event/%s/match_videos/add" % self.auth_event_key
-        data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + data
-        return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
+        return self._post("event/%s/match_videos/add", json.dumps(data))
 
     def add_event_videos(self, data):
         """
@@ -503,7 +483,4 @@ class TBA:
 
         :param data: Dictionary of partial match keys to youtube video ids.
         """
-        url = "event/{}/media/add" % self.auth_event_key
-        data = json.dumps(data)
-        concat = self.auth_secret + "/api/trusted/v1/" + url + data
-        return self._post(url, data, md5(concat.encode("utf-8")).hexdigest())
+        return self._post("event/%s/media/add", json.dumps(data))
