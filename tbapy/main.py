@@ -427,7 +427,7 @@ class TBA:
 
         :param data: Dictionary of data to update the event with.
         """
-        return self._post(url, json.dumps(data))
+        return self._post("event/%s/info/update", json.dumps(data))
 
     def update_event_alliances(self, data):
         """
@@ -435,7 +435,7 @@ class TBA:
 
         :param data: List of lists of alliances in frc#### string format.
         """
-        return self._post(url, json.dumps(data))
+        return self._post("event/%s/alliance_selections/update", json.dumps(data))
 
     def update_event_awards(self, data):
         """
@@ -443,7 +443,7 @@ class TBA:
 
         :param data: List of Dictionaries of award winners. Each dictionary should have a name_str for the award name, team_key in frc#### string format, and the awardee for any awards given to individuals. The last two can be null
         """
-        return self._post(url, json.dumps(data))
+        return self._post("event/%s/awards/update", json.dumps(data))
 
     def update_event_matches(self, data):
         """
@@ -451,7 +451,7 @@ class TBA:
 
         :param data: List of Dictionaries. More info about the match data can be found in the API docs.
         """
-        return self._post(url, json.dumps(data))
+        return self._post("event/%s/matches/update", json.dumps(data))
 
     def delete_event_matches(self, data):
         """
@@ -459,7 +459,7 @@ class TBA:
 
         :param data: List of match keys to delete
         """
-        return self._post(url, json.dumps(data))
+        return self._post("event/%s/matches/delete", json.dumps(data))
 
     def update_event_rankings(self, data):
         """
@@ -467,7 +467,7 @@ class TBA:
 
         :param data: Dictionary of breakdowns and rankings. Rankings are a list of dictionaries.
         """
-        return self._post(url, json.dumps(data))
+        return self._post("event/%s/rankings/update", json.dumps(data))
 
     def add_match_videos(self, data):
         """
