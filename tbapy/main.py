@@ -50,7 +50,7 @@ class TBA:
         :return: Requests Response object.
 
         """
-        return post(self.WRITE_URL_PRE + url % self.event_key, data=data, headers={'X-TBA-Auth-Id': self.auth_id, 'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url + data).encode('utf-8')).hexdigest()})
+        return post(self.WRITE_URL_PRE + url % self.event_key, data=data, headers={'X-TBA-Auth-Id': self.auth_id, 'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url % self.event_key + data).encode('utf-8')).hexdigest()})
 
     @staticmethod
     def team_key(identifier):
