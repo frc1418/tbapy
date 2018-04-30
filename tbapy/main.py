@@ -16,20 +16,21 @@ class TBA:
     auth_key = ''
     auth_id = None
     auth_secret = None
-    auth_event_key = ''
+    event_key = ''
 
-    def __init__(self, auth_key, auth_id=None, auth_secret=None, auth_event_key=''):
+    def __init__(self, auth_key, auth_id=None, auth_secret=None, event_key=''):
         """
         Store auth key so we can reuse it as many times as we make a request.
 
         :param auth_key: Your application authorization key, obtainable at https://www.thebluealliance.com/account.
         :param auth_id: Your event authorization ID, obtainable at https://www.thebluealliance.com/request/apiwrite
         :param auth_secret: Your event authorization secret, obtainable at https://www.thebluealliance.com/request/apiwrite
+        :param event_key: The event key that is linked to the ID and secret provided.
         """
         self.auth_key = auth_key
         self.auth_id = auth_id
         self.auth_secret = auth_secret
-        self.auth_event_key = auth_event_key
+        self.event_key = event_key
 
     def _get(self, url):
         """
@@ -44,12 +45,12 @@ class TBA:
         """
         Helper method: POST data to a given URL on TBA's API.
 
-        :param url: URL string to post data to.
-        :pararm data: Dumped data to post.
+        :param url: URL string to post data to and hash.
+        :pararm data: JSON data to post and hash.
         :return: Requests Response object.
 
         """
-        return post(self.WRITE_URL_PRE + url % self.auth_event_key, data=data, headers={'X-TBA-Auth-Id': self.auth_id, 'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url + data).encode('utf-8')).hexdigest()})
+        return post(self.WRITE_URL_PRE + url % self.event_key, data=data, headers={'X-TBA-Auth-Id': self.auth_id, 'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url + data).encode('utf-8')).hexdigest()})
 
     @staticmethod
     def team_key(identifier):
@@ -410,16 +411,17 @@ class TBA:
         else:
             return [Team(raw) for raw in self._get('district/%s/teams' % district)]
 
-    def update_trusted(self, auth_id, auth_secret, auth_event_key):
+    def update_trusted(self, auth_id, auth_secret, event_key):
         """
         Set Trusted API ID and Secret and the event key they are assigned to.
 
         :param auth_id: Your event authorization ID, obtainable at https://www.thebluealliance.com/request/apiwrite
         :param auth_secret: Your event authorization secret, obtainable at https://www.thebluealliance.com/request/apiwrite
+        :param event_key: The event key that is linked to the ID and secret provided.
         """
         self.auth_id = auth_id
         self.auth_secret = auth_secret
-        self.auth_event_key = auth_event_key
+        self.event_key = event_key
 
     def update_event_info(self, data):
         """
