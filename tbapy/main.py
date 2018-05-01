@@ -1,4 +1,4 @@
-from requests import get, post
+import requests
 import simplejson as json
 from hashlib import md5
 from .models import *
@@ -13,8 +13,7 @@ class TBA:
 
     READ_URL_PRE = 'https://www.thebluealliance.com/api/v3/'
     WRITE_URL_PRE = 'https://www.thebluealliance.com/api/trusted/v1/'
-    auth_key = ''
-    auth_id = None
+    session = requests.Session()
     auth_secret = None
     event_key = ''
 
@@ -27,10 +26,9 @@ class TBA:
         :param auth_secret: Your event authorization secret, obtainable at https://www.thebluealliance.com/request/apiwrite
         :param event_key: The event key that is linked to the ID and secret provided.
         """
-        self.auth_key = auth_key
-        self.auth_id = auth_id
         self.auth_secret = auth_secret
         self.event_key = event_key
+        self.session.headers.update({'X-TBA-Auth-Key': auth_key, 'X-TBA-Auth-Id': auth_id})
 
     def _get(self, url):
         """
@@ -39,7 +37,7 @@ class TBA:
         :param url: URL string to get data from.
         :return: Requested data in JSON format.
         """
-        return get(self.READ_URL_PRE + url, headers={'X-TBA-Auth-Key': self.auth_key}).json()
+        return self.session.get(self.READ_URL_PRE + url).json()
 
     def _post(self, url, data):
         """
@@ -50,7 +48,7 @@ class TBA:
         :return: Requests Response object.
 
         """
-        return post(self.WRITE_URL_PRE + url % self.event_key, data=data, headers={'X-TBA-Auth-Id': self.auth_id, 'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url % self.event_key + data).encode('utf-8')).hexdigest()})
+        return self.session.post(self.WRITE_URL_PRE + url % self.event_key, data=data, headers={'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url % self.event_key + data).encode('utf-8')).hexdigest()})
 
     @staticmethod
     def team_key(identifier):
@@ -419,7 +417,7 @@ class TBA:
         :param auth_secret: Your event authorization secret, obtainable at https://www.thebluealliance.com/request/apiwrite
         :param event_key: The event key that is linked to the ID and secret provided.
         """
-        self.auth_id = auth_id
+        self.session.headers.update({'X-TBA-Auth-Id': auth_id})
         self.auth_secret = auth_secret
         self.event_key = event_key
 
@@ -470,6 +468,14 @@ class TBA:
         :param data: Dictionary of breakdowns and rankings. Rankings are a list of dictionaries.
         """
         return self._post('event/%s/rankings/update', json.dumps(data))
+
+    def update_event_team_list(self, data):
+        """
+        Update an event's team list on The Blue Alliance.
+
+        :param data: a list of team keys in frc#### string format.
+        """
+        return self._post('event/%s/team_list/update', json.dumps(data))
 
     def add_match_videos(self, data):
         """
