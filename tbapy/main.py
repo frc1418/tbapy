@@ -14,10 +14,10 @@ class TBA:
     READ_URL_PRE = 'https://www.thebluealliance.com/api/v3/'
     WRITE_URL_PRE = 'https://www.thebluealliance.com/api/trusted/v1/'
     session = requests.Session()
-    auth_secret = None
+    auth_secret = ''
     event_key = ''
 
-    def __init__(self, auth_key, auth_id=None, auth_secret=None, event_key=''):
+    def __init__(self, auth_key, auth_id='', auth_secret='', event_key=''):
         """
         Store auth key so we can reuse it as many times as we make a request.
 
@@ -460,6 +460,13 @@ class TBA:
         :param data: List of match keys to delete
         """
         return self._post('event/%s/matches/delete', json.dumps(data))
+
+    def delete_all_event_matches(self):
+        """
+        Delete all of an event's matches on The Blue Alliance.
+
+        """
+        return self._post('event/%s/matches/delete_all', json.dumps(self.event_key))
 
     def update_event_rankings(self, data):
         """
