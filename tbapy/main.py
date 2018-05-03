@@ -1,5 +1,5 @@
 import requests
-import simplejson as json
+import json
 from hashlib import md5
 from .models import *
 
@@ -453,20 +453,13 @@ class TBA:
         """
         return self._post('event/%s/matches/update', json.dumps(data))
 
-    def delete_event_matches(self, data):
+    def delete_event_matches(self, data=None):
         """
         Delete an event's matches on The Blue Alliance.
 
-        :param data: List of match keys to delete
+        :param data: List of match keys to delete, can be ommited if you would like to delete all matches.
         """
-        return self._post('event/%s/matches/delete', json.dumps(data))
-
-    def delete_all_event_matches(self):
-        """
-        Delete all of an event's matches on The Blue Alliance.
-
-        """
-        return self._post('event/%s/matches/delete_all', json.dumps(self.event_key))
+        return self._post('event/%s/matches/delete_all' if data is None else 'event/%s/matches/delete', json.dumps(self.event_key) if data is None else json.dumps(data))
 
     def update_event_rankings(self, data):
         """
@@ -496,6 +489,6 @@ class TBA:
         """
         Add videos to an event's media tab on The Blue Alliance.
 
-        :param data: Dictionary of partial match keys to youtube video ids.
+        :param data: List of youtube video ids.
         """
         return self._post('event/%s/media/add', json.dumps(data))

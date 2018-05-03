@@ -70,6 +70,28 @@ See `example.py` for several usage examples.
 
 Documentation for The Blue Alliance's API can be found [here](https://www.thebluealliance.com/apidocs).
 
+## Write Functions
+Writing to The Blue Alliance requires an additional set of tokens that can be obtained [here](https://www.thebluealliance.com/request/apiwrite). 
+
+Since each set of tokens is unique to an event you will have the instantiate the TBA class like so:
+```
+tba = tbapy.TBA('key', 'ID', 'secret', 'event_key')
+```
+or update an existing TBA object like so:
+```
+tba.update_trusted('ID', 'secret', 'event_key')
+```
+All of the write functions require data models that can be found [here at the Write API documentation](https://www.thebluealliance.com/apidocs/trusted/v1)
+* `tba.update_event_info(info)` - Update the Event's info with the given dictionary.
+* `tba.update_event_alliances(alliances)` - Update the alliances. Input is a list of lists, 8 lists with the team names in frc#### format are expected.
+* `tba.update_event_awards(awards)` - Update the awards for an event with a list of dictionaries. Each dictionary must have a name_str key and optionally a team_key key in frc### format and/or an awardee key for an individual award.
+* `tba.update_event_matches(rankings)` - Update the matches of an event with a dictionary. Additional info can be found in the Write API Documentation on The Blue Alliance.
+* `tba.delete_event_matches([matches])` - Delete all matches or the matches in the given list.
+* `tba.update_event_rankings(rankings)` - Update rankings of an event with a dictionary containing a breakdowns key and rankings key. Rankings key must have a list of dictionaries as the value.
+* `tba.update_event_team_list(team_list)` - Replace the event's team list with the list given.
+* `tba.add_match_videos(match_videos)` - Add YouTube videos to matches with a dictionary of partial match keys to YouTube video ids.
+* `tba.add_event_videos(event_videos)` - Add videos to the event's media tab on The Blue Alliance with a list of YouTube video ids.
+
 ## Authors
 This software was created and is maintained by [Erik Boesen](https://github.com/ErikBoesen) with [Team 1418](https://github.com/frc1418). Additional contributions made by [Ian Weiss](https://github.com/endreman0) with [Team 4131](https://github.com/FRC4131).
 
