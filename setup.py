@@ -10,5 +10,5 @@ setup(name='tbapy',
       author_email='robotics1418@gmail.com',
       license='MIT',
       packages=['tbapy'],
-      install_requires=['requests'],
+      install_requires=['requests', 'cachecontrol'],
       zip_safe=False)

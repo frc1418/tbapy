@@ -2,6 +2,7 @@ import requests
 import json
 from hashlib import md5
 from .models import *
+from cachecontrol import CacheControl
 
 
 class TBA:
@@ -13,7 +14,7 @@ class TBA:
 
     READ_URL_PRE = 'https://www.thebluealliance.com/api/v3/'
     WRITE_URL_PRE = 'https://www.thebluealliance.com/api/trusted/v1/'
-    session = requests.Session()
+    session = CacheControl(requests.Session())
     auth_secret = ''
     event_key = ''
 
