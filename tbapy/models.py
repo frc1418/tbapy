@@ -1,8 +1,9 @@
 class _base_model_class(dict):
-    def __init__(self, json={}):
+    def __init__(self, json={}, lastmodified=0):
         self.update(json)
         self.update(self.__dict__)
         self.__dict__ = self
+        self.lastmodified = lastmodified
 
     def __repr__(self):
         return '%s(%s)' % (self.__class__.__name__, self.json())

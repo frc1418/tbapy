@@ -1,5 +1,7 @@
 import requests
 import json
+import time
+from datetime import datetime
 from hashlib import md5
 from .models import *
 from cachecontrol import CacheControl
@@ -31,14 +33,16 @@ class TBA:
         self.event_key = event_key
         self.session.headers.update({'X-TBA-Auth-Key': auth_key, 'X-TBA-Auth-Id': auth_id})
 
-    def _get(self, url):
+    def _get(self, url, lastmodified=0):
         """
         Helper method: GET data from given URL on TBA's API.
 
         :param url: URL string to get data from.
-        :return: Requested data in JSON format.
+        :return: Tuple of Requested data in JSON format and Last Modified header in Time Stamp form.
         """
-        return self.session.get(self.READ_URL_PRE + url).json()
+        self.session.headers.update({'If-Modified-Since': datetime.fromtimestamp(lastmodified).strftime('%a, %d %b %Y %H:%M:%S %Z')})
+        r = self.session.get(self.READ_URL_PRE + url)
+        return r.json(), int(time.mktime(datetime.strptime(r.headers['Last-Modified'], '%a, %d %b %Y %H:%M:%S %Z').timetuple()))
 
     def _post(self, url, data):
         """
@@ -65,16 +69,16 @@ class TBA:
         """
         return identifier if type(identifier) == str else 'frc%s' % identifier
 
-    def status(self):
+    def status(self, lastmodified=0):
         """
         Get TBA API status information.
 
         :return: Data on current status of the TBA API as APIStatus object.
         """
-        return APIStatus(self._get('status'))
+        return APIStatus(*self._get('status', lastmodified))
 
     # TODO: Allow automatic getting of entire team list.
-    def teams(self, page, year=None, simple=False, keys=False):
+    def teams(self, page, year=None, simple=False, keys=False, lastmodified=0):
         """
         Get list of teams.
 
@@ -86,16 +90,18 @@ class TBA:
         """
         if year:
             if keys:
-                return self._get('teams/%s/%s/keys' % (year, page))
+                return self._get('teams/%s/%s/keys' % (year, page), lastmodified)
             else:
-                return [Team(raw) for raw in self._get('teams/%s/%s%s' % (year, page, '/simple' if simple else ''))]
+                tup = self._get('teams/%s/%s%s' % (year, page, '/simple' if simple else ''), lastmodified)
+                return [Team(raw, tup[1]) for raw in tup[0]]
         else:
             if keys:
-                return self._get('teams/%s/keys' % page)
+                return self._get('teams/%s/keys' % page, lastmodified)
             else:
-                return [Team(raw) for raw in self._get('teams/%s%s' % (page, '/simple' if simple else ''))]
+                tup = self._get('teams/%s%s' % (page, '/simple' if simple else ''), lastmodified)
+                return [Team(raw, tup[1]) for raw in tup[0]]
 
-    def team(self, team, simple=False):
+    def team(self, team, simple=False, lastmodified=0):
         """
         Get data on a single specified team.
 
@@ -103,9 +109,9 @@ class TBA:
         :param simple: Get only vital data.
         :return: Team object with data on specified team.
         """
-        return Team(self._get('team/%s%s' % (self.team_key(team), '/simple' if simple else '')))
+        return Team(*self._get('team/%s%s' % (self.team_key(team), '/simple' if simple else '')), lastmodified)
 
-    def team_events(self, team, year=None, simple=False, keys=False):
+    def team_events(self, team, year=None, simple=False, keys=False, lastmodified=0):
         """
         Get team events a team has participated in.
 
@@ -117,16 +123,18 @@ class TBA:
         """
         if year:
             if keys:
-                return self._get('team/%s/events/%s/keys' % (self.team_key(team), year))
+                return self._get('team/%s/events/%s/keys' % (self.team_key(team), year), lastmodified)
             else:
-                return [Event(raw) for raw in self._get('team/%s/events/%s%s' % (self.team_key(team), year, '/simple' if simple else ''))]
+                tup = self._get('team/%s/events/%s%s' % (self.team_key(team), year, '/simple' if simple else ''), lastmodified)
+                return [Event(raw, tup[1]) for raw in tup[0]]
         else:
             if keys:
-                return self._get('team/%s/events/keys' % self.team_key(team))
+                return self._get('team/%s/events/keys' % self.team_key(team), lastmodified)
             else:
-                return [Event(raw) for raw in self._get('team/%s/events%s' % (self.team_key(team), '/simple' if simple else ''))]
+                tup = self._get('team/%s/events%s' % (self.team_key(team), '/simple' if simple else ''), lastmodified)
+                return [Event(raw, tup[1]) for raw in tup[0]]
 
-    def team_awards(self, team, year=None, event=None):
+    def team_awards(self, team, year=None, event=None, lastmodified=0):
         """
         Get list of awards team has recieved.
 
@@ -136,14 +144,17 @@ class TBA:
         :return: List of Award objects
         """
         if event:
-            return [Award(raw) for raw in self._get('team/%s/event/%s/awards' % (self.team_key(team), event))]
+            tup = self._get('team/%s/event/%s/awards' % (self.team_key(team), event), lastmodified)
+            return [Award(raw, tup[1]) for raw in tup[0]]
         else:
             if year:
-                return [Award(raw) for raw in self._get('team/%s/awards/%s' % (self.team_key(team), year))]
+                tup = self._get('team/%s/awards/%s' % (self.team_key(team), year), lastmodified)
+                return [Award(raw, tup[1]) for raw in tup[0]]
             else:
-                return [Award(raw) for raw in self._get('team/%s/awards' % self.team_key(team))]
+                tup = self._get('team/%s/awards' % self.team_key(team), lastmodified)
+                return [Award(raw, tup[1]) for raw in tup[0]]
 
-    def team_matches(self, team, event=None, year=None, simple=False, keys=False):
+    def team_matches(self, team, event=None, year=None, simple=False, keys=False, lastmodified=0):
         """
         Get list of matches team has participated in.
 
@@ -156,25 +167,27 @@ class TBA:
         """
         if event:
             if keys:
-                return self._get('team/%s/event/%s/matches/keys' % (self.team_key(team), event))
+                return self._get('team/%s/event/%s/matches/keys' % (self.team_key(team), event), lastmodified)
             else:
-                return [Match(raw) for raw in self._get('team/%s/event/%s/matches%s' % (self.team_key(team), event, '/simple' if simple else ''))]
+                tup = self._get('team/%s/event/%s/matches%s' % (self.team_key(team), event, '/simple' if simple else ''), lastmodified)
+                return [Match(raw, tup[1]) for raw in tup[0]]
         elif year:
             if keys:
-                return self._get('team/%s/matches/%s/keys' % (self.team_key(team), year))
+                return self._get('team/%s/matches/%s/keys' % (self.team_key(team), year), lastmodified)
             else:
-                return [Match(raw) for raw in self._get('team/%s/matches/%s%s' % (self.team_key(team), year, '/simple' if simple else ''))]
+                tup = self._get('team/%s/matches/%s%s' % (self.team_key(team), year, '/simple' if simple else ''), lastmodified)
+                return [Match(raw, tup[1]) for raw in tup[0]]
 
-    def team_years(self, team):
+    def team_years(self, team, lastmodified=0):
         """
         Get years during which a team participated in FRC.
 
         :param team: Key for team to get data about.
         :return: List of integer years in which team participated.
         """
-        return self._get('team/%s/years_participated' % self.team_key(team))
+        return self._get('team/%s/years_participated' % self.team_key(team), lastmodified)
 
-    def team_media(self, team, year=None, tag=None):
+    def team_media(self, team, year=None, tag=None, lastmodified=0):
         """
         Get media for a given team.
 
@@ -183,36 +196,40 @@ class TBA:
         :param tag: Get only media with a given tag.
         :return: List of Media objects.
         """
-        return [Media(raw) for raw in self._get('team/%s/media%s%s' % (self.team_key(team), ('/tag/%s' % tag) if tag else '', ('/%s' % year) if year else ''))]
+        tup = self._get('team/%s/media%s%s' % (self.team_key(team), ('/tag/%s' % tag) if tag else '', ('/%s' % year) if year else ''), lastmodified)
+        return [Media(raw, tup[1]) for raw in tup[0]]
 
-    def team_robots(self, team):
+    def team_robots(self, team, lastmodified=0):
         """
         Get data about a team's robots.
 
         :param team: Key for team whose robots you want data on.
         :return: List of Robot objects
         """
-        return [Robot(raw) for raw in self._get('team/%s/robots' % self.team_key(team))]
+        tup = self._get('team/%s/robots' % self.team_key(team), lastmodified)
+        return [Robot(raw, tup[1]) for raw in tup[0]]
 
-    def team_districts(self, team):
+    def team_districts(self, team, lastmodified=0):
         """
         Get districts a team has competed in.
 
         :param team: Team to get data on.
         :return: List of District objects.
         """
-        return [District(raw) for raw in self._get('team/%s/districts' % self.team_key(team))]
+        tup = self._get('team/%s/districts' % self.team_key(team), lastmodified)
+        return [District(raw, tup[1]) for raw in tup[0]]
 
-    def team_profiles(self, team):
+    def team_profiles(self, team, lastmodified=0):
         """
         Get team's social media profiles linked on their TBA page.
 
         :param team: Team to get data on.
         :return: List of Profile objects.
         """
-        return [Profile(raw) for raw in self._get('team/%s/social_media' % self.team_key(team))]
+        tup = self._get('team/%s/social_media' % self.team_key(team), lastmodified)
+        return [Profile(raw, tup[1]) for raw in tup[0]]
 
-    def team_status(self, team, event):
+    def team_status(self, team, event, lastmodified=0):
         """
         Get status of a team at an event.
 
@@ -220,9 +237,9 @@ class TBA:
         :param event: Event team is at.
         :return: Status object.
         """
-        return Status(self._get('team/%s/event/%s/status' % (self.team_key(team), event)))
+        return Status(*self._get('team/%s/event/%s/status' % (self.team_key(team), event), lastmodified))
 
-    def events(self, year, simple=False, keys=False):
+    def events(self, year, simple=False, keys=False, lastmodified=0):
         """
         Get a list of events in a given year.
 
@@ -232,11 +249,12 @@ class TBA:
         :return: List of string event keys or Event objects.
         """
         if keys:
-            return self._get('events/%s/keys' % year)
+            return self._get('events/%s/keys' % year, lastmodified)
         else:
-            return [Event(raw) for raw in self._get('events/%s%s' % (year, '/simple' if simple else ''))]
+            tup = self._get('events/%s%s' % (year, '/simple' if simple else ''), lastmodified)
+            return [Event(raw, tup[1]) for raw in tup[0]]
 
-    def event(self, event, simple=False):
+    def event(self, event, simple=False, lastmodified=0):
         """
         Get basic information about an event.
 
@@ -246,63 +264,64 @@ class TBA:
         :param simple: Get only vital data.
         :return: A single Event object.
         """
-        return Event(self._get('event/%s%s' % (event, '/simple' if simple else '')))
+        return Event(*self._get('event/%s%s' % (event, '/simple' if simple else ''), lastmodified))
 
-    def event_alliances(self, event):
+    def event_alliances(self, event, lastmodified=0):
         """
         Get information about alliances at event.
 
         :param event: Key of event to get data on.
         :return: List of Alliance objects.
         """
-        return [Alliance(raw) for raw in self._get('event/%s/alliances' % event)]
+        tup = self._get('event/%s/alliances' % event, lastmodified)
+        return [Alliance(raw, tup[1]) for raw in tup[0]]
 
-    def event_district_points(self, event):
+    def event_district_points(self, event, lastmodified=0):
         """
         Get district point information about an event.
 
         :param event: Key of event to get data on.
         :return: Single DistrictPoints object.
         """
-        return DistrictPoints(self._get('event/%s/district_points' % event))
+        return DistrictPoints(*self._get('event/%s/district_points' % event, lastmodified))
 
-    def event_insights(self, event):
+    def event_insights(self, event, lastmodified=0):
         """
         Get insights about an event.
 
         :param event: Key of event to get data on.
         :return: Single Insights object.
         """
-        return Insights(self._get('event/%s/insights' % event))
+        return Insights(*self._get('event/%s/insights' % event, lastmodified))
 
-    def event_oprs(self, event):
+    def event_oprs(self, event, lastmodified=0):
         """
         Get OPRs from an event.
 
         :param event: Key of event to get data on.
         :return: Single OPRs object.
         """
-        return OPRs(self._get('event/%s/oprs' % event))
+        return OPRs(*self._get('event/%s/oprs' % event, lastmodified))
 
-    def event_predictions(self, event):
+    def event_predictions(self, event, lastmodified=0):
         """
         Get predictions for matches during an event.
 
         :param event: Key of event to get data on.
         :return: Single Predictions object.
         """
-        return Predictions(self._get('event/%s/predictions' % event))
+        return Predictions(*self._get('event/%s/predictions' % event, lastmodified))
 
-    def event_rankings(self, event):
+    def event_rankings(self, event, lastmodified=0):
         """
         Get rankings from an event.
 
         :param event: Key of event to get data on.
         :return: Single Rankings object.
         """
-        return Rankings(self._get('event/%s/rankings' % event))
+        return Rankings(*self._get('event/%s/rankings' % event, lastmodified))
 
-    def event_teams(self, event, simple=False, keys=False):
+    def event_teams(self, event, simple=False, keys=False, lastmodified=0):
         """
         Get list of teams at an event.
 
@@ -312,20 +331,22 @@ class TBA:
         :return: List of string keys or Team objects.
         """
         if keys:
-            return self._get('event/%s/teams/keys' % event)
+            return self._get('event/%s/teams/keys' % event, lastmodified)
         else:
-            return [Team(raw) for raw in self._get('event/%s/teams%s' % (event, '/simple' if simple else ''))]
+            tup = self._get('event/%s/teams%s' % (event, '/simple' if simple else ''), lastmodified)
+            return [Team(raw, tup[1]) for raw in tup[0]]
 
-    def event_awards(self, event):
+    def event_awards(self, event, lastmodified=0):
         """
         Get list of awards presented at an event.
 
         :param event: Event key to get data on.
         :return: List of Award objects.
         """
-        return [Award(raw) for raw in self._get('event/%s/awards' % event)]
+        tup = self._get('event/%s/awards' % event, lastmodified)
+        return [Award(raw, tup[1]) for raw in tup[0]]
 
-    def event_matches(self, event, simple=False, keys=False):
+    def event_matches(self, event, simple=False, keys=False, lastmodified=0):
         """
         Get list of matches played at an event.
 
@@ -335,11 +356,12 @@ class TBA:
         :return: List of string keys or Match objects.
         """
         if keys:
-            return self._get('event/%s/matches/keys' % event)
+            return self._get('event/%s/matches/keys' % event, lastmodified)
         else:
-            return [Match(raw) for raw in self._get('event/%s/matches%s' % (event, '/simple' if simple else ''))]
+            tup = self._get('event/%s/matches%s' % (event, '/simple' if simple else ''), lastmodified)
+            return [Match(raw, tup[1]) for raw in tup[0]]
 
-    def match(self, key=None, year=None, event=None, type='qm', number=None, round=None, simple=False):
+    def match(self, key=None, year=None, event=None, type='qm', number=None, round=None, simple=False, lastmodified=0):
         """
         Get data on a match.
 
@@ -355,25 +377,26 @@ class TBA:
         :return: A single Match object.
         """
         if key:
-            return Match(self._get('match/%s%s' % (key, '/simple' if simple else '')))
+            return Match(*self._get('match/%s%s' % (key, '/simple' if simple else ''), lastmodified))
         else:
-            return Match(self._get('match/{year}{event}_{type}{number}{round}{simple}'.format(year=year if not event[0].isdigit() else '',
-                                                                                              event=event,
-                                                                                              type=type,
-                                                                                              number=number,
-                                                                                              round=('m%s' % round) if not type == 'qm' else '',
-                                                                                              simple='/simple' if simple else '')))
+            return Match(*self._get('match/{year}{event}_{type}{number}{round}{simple}'.format(year=year if not event[0].isdigit() else '',
+                                                                                               event=event,
+                                                                                               type=type,
+                                                                                               number=number,
+                                                                                               round=('m%s' % round) if not type == 'qm' else '',
+                                                                                               simple='/simple' if simple else ''), lastmodified))
 
-    def districts(self, year):
+    def districts(self, year, lastmodified=0):
         """
         Return a list of districts active.
 
         :param year: Year from which you want to get active districts.
         :return: A list of District objects.
         """
-        return [District(raw) for raw in self._get('districts/%s' % year)]
+        tup = self._get('districts/%s' % year, lastmodified)
+        return [District(raw, tup[1]) for raw in tup[0]]
 
-    def district_events(self, district, simple=False, keys=False):
+    def district_events(self, district, simple=False, keys=False, lastmodified=0):
         """
         Return list of events in a given district.
 
@@ -383,20 +406,22 @@ class TBA:
         :return: List of string keys or Event objects.
         """
         if keys:
-            return self._get('district/%s/events/keys' % district)
+            return self._get('district/%s/events/keys' % district, lastmodified)
         else:
-            return [Event(raw) for raw in self._get('district/%s/events%s' % (district, '/simple' if simple else ''))]
+            tup = self._get('district/%s/events%s' % (district, '/simple' if simple else ''), lastmodified)
+            return [Event(raw, tup[1]) for raw in tup[0]]
 
-    def district_rankings(self, district):
+    def district_rankings(self, district, lastmodified=0):
         """
         Return data about rankings in a given district.
 
         :param district: Key of district to get rankings of.
         :return: List of DistrictRanking objects.
         """
-        return [DistrictRanking(raw) for raw in self._get('district/%s/rankings' % district)]
+        tup = self._get('district/%s/rankings' % district, lastmodified)
+        return [DistrictRanking(raw, tup[1]) for raw in tup[0]]
 
-    def district_teams(self, district, simple=False, keys=False):
+    def district_teams(self, district, simple=False, keys=False, lastmodified=0):
         """
         Get list of teams in the given district.
 
@@ -406,9 +431,10 @@ class TBA:
         :return: List of string keys or Team objects.
         """
         if keys:
-            return self._get('district/%s/teams/keys' % district)
+            return self._get('district/%s/teams/keys' % district, lastmodified)
         else:
-            return [Team(raw) for raw in self._get('district/%s/teams' % district)]
+            tup = self._get('district/%s/teams' % district, lastmodified)
+            return [Team(raw, tup[1]) for raw in tup[0]]
 
     def update_trusted(self, auth_id, auth_secret, event_key):
         """
