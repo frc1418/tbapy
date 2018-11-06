@@ -72,27 +72,40 @@ class TBA:
         """
         return APIStatus(self._get('status'))
 
-    # TODO: Allow automatic getting of entire team list.
-    def teams(self, page, year=None, simple=False, keys=False):
+    def teams(self, page=None, year=None, simple=False, keys=False):
         """
         Get list of teams.
 
         :param page: Page of teams to view. Each page contains 500 teams.
-        :param year: Pass this parameter to view teams from a specific year.
+        :param year: View teams from a specific year.
         :param simple: Get only vital data.
         :param keys: Set to true if you only want the teams' keys rather than full data on them.
         :return: List of Team objects or string keys.
         """
-        if year:
-            if keys:
-                return self._get('teams/%s/%s/keys' % (year, page))
+        # If the user has requested a specific page, get that page.
+        if page is not None:
+            if year:
+                if keys:
+                    return self._get('teams/%s/%s/keys' % (year, page))
+                else:
+                    return [Team(raw) for raw in self._get('teams/%s/%s%s' % (year, page, '/simple' if simple else ''))]
             else:
-                return [Team(raw) for raw in self._get('teams/%s/%s%s' % (year, page, '/simple' if simple else ''))]
+                if keys:
+                    return self._get('teams/%s/keys' % page)
+                else:
+                    return [Team(raw) for raw in self._get('teams/%s%s' % (page, '/simple' if simple else ''))]
+        # If no page was specified, get all of them and combine.
         else:
-            if keys:
-                return self._get('teams/%s/keys' % page)
-            else:
-                return [Team(raw) for raw in self._get('teams/%s%s' % (page, '/simple' if simple else ''))]
+            teams = []
+            target = 0
+            while True:
+                page_teams = self.teams(page=target, year=year, simple=simple, keys=keys)
+                if page_teams:
+                    teams.extend(page_teams)
+                else:
+                    break
+                target += 1
+            return teams
 
     def team(self, team, simple=False):
         """
