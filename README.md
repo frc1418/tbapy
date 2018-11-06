@@ -38,7 +38,7 @@ You may specify `simple=True` to get only vital data on some models or lists of 
 
 Some requests support `year` and other optional parameters, which are recommended to use to narrow down your results.
 * `tba.status()` - Get TBA's status.
-* `tba.teams(page, [year], [simple/keys])` - Get a list of of valid teams, where `page * 500` is the starting team number.
+* `tba.teams([page], [year], [simple/keys])` - Get a list of of valid teams, where `page * 500` is the starting team number. If no page is provided, all teams will be fetched.
 * `tba.team(team, [simple])` - Get a team's data. `team` can be an integer team number of a string-form `'frc####'` identifier.
 * `tba.team_events(team, [year], [simple/keys])` - Get a list of events a team has been to.
 * `tba.team_awards(team, [event/year])` - Get a list of the team's awards.
@@ -71,7 +71,7 @@ See `example.py` for several usage examples.
 Documentation for The Blue Alliance's API can be found [here](https://www.thebluealliance.com/apidocs).
 
 ## Write Functions
-Writing to The Blue Alliance requires an additional set of tokens that can be obtained [here](https://www.thebluealliance.com/request/apiwrite). 
+Writing to The Blue Alliance requires an additional set of tokens that can be obtained [here](https://www.thebluealliance.com/request/apiwrite).
 
 Since each set of tokens is unique to an event you will have the instantiate the TBA class like so:
 ```
