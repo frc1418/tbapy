@@ -2,6 +2,7 @@ import requests
 import json
 from hashlib import md5
 from .models import *
+from .exceptions import *
 
 
 class TBA:
@@ -37,7 +38,9 @@ class TBA:
         :param url: URL string to get data from.
         :return: Requested data in JSON format.
         """
-        return self.session.get(self.READ_URL_PRE + url).json()
+        raw_json = self.session.get(self.READ_URL_PRE + url).json()
+        self._detect_errors(raw_json)
+        return raw_json
 
     def _post(self, url, data):
         """
@@ -48,7 +51,17 @@ class TBA:
         :return: Requests Response object.
 
         """
-        return self.session.post(self.WRITE_URL_PRE + url % self.event_key, data=data, headers={'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url % self.event_key + data).encode('utf-8')).hexdigest()})
+        raw_json = self.session.post(self.WRITE_URL_PRE + url % self.event_key, data=data, headers={'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url % self.event_key + data).encode('utf-8')).hexdigest()})
+        self._detect_errors(raw_json)
+        return raw_json
+
+    def _detect_errors(self, json):
+        if not isinstance(json, dict):
+            return
+
+        errors = json.get('Errors')
+        if errors is not None:
+            raise TBAErrorList([error.popitem() for error in errors])
 
     @staticmethod
     def team_key(identifier):
