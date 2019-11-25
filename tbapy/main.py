@@ -1,8 +1,23 @@
+import functools
 import requests
 import json
 from hashlib import md5
 from .models import *
 from .exceptions import *
+
+
+
+class LastModifiedDate:
+    def __init__(self, date_string):
+        self.date_string = date_string
+
+    def __bool__(self):
+        return False
+
+
+class NotModifiedException(Exception):
+    def __init__(self, last_modified):
+        self.last_modified = LastModifiedDate(last_modified)
 
 
 class TBA:
@@ -30,7 +45,7 @@ class TBA:
         self.auth_secret = auth_secret
         self.event_key = event_key
         self.session.headers.update({'X-TBA-Auth-Key': auth_key, 'X-TBA-Auth-Id': auth_id})
-        self.if_modified_since = None
+        self._if_modified_since = None
 
     def _get(self, url):
         """
@@ -40,13 +55,13 @@ class TBA:
         :return: Requested data in JSON format.
         """
         extra_headers = {}
-        if self.if_modified_since is not None:
-            extra_headers['If-Modified-Since': self.if_modified_since]
+        if self._if_modified_since is not None:
+            extra_headers['If-Modified-Since'] = self._if_modified_since
         
         response = self.session.get(self.READ_URL_PRE + url, headers=extra_headers)
         last_modified = response.headers.get('Last-Modified')
         if response.status_code == 304 and last_modified is not None:
-            raise LastModifiedException(response.headers['Last-Modified'])
+            raise NotModifiedException(response.headers['Last-Modified'])
 
         raw = response.json()
         self._detect_errors(raw)
@@ -80,10 +95,16 @@ class TBA:
         if errors is not None:
             raise TBAErrorList([error.popitem() for error in errors])
 
-    def _cache_response(func):
-        def wrapper(*args, **kwargs):
-
-            func(*args, **kwargs)
+    def _check_modified(func):
+        @functools.wraps(func)
+        def wrapper(self, *args, if_modified_since=None, silent=True, **kwargs):
+            self._if_modified_since = if_modified_since
+            try: 
+                return func(self, *args, **kwargs)
+            except NotModifiedException as e:
+                if not silent:
+                    raise e from None
+                return e.last_modified
         return wrapper
 
     @staticmethod
@@ -100,6 +121,7 @@ class TBA:
         """
         return identifier if type(identifier) == str else 'frc%s' % identifier
 
+    @_check_modified
     def status(self):
         """
         Get TBA API status information.
@@ -108,6 +130,7 @@ class TBA:
         """
         return APIStatus(self._get('status'))
 
+    @_check_modified
     def teams(self, page=None, year=None, simple=False, keys=False):
         """
         Get list of teams.
@@ -143,6 +166,7 @@ class TBA:
                 target += 1
             return teams
 
+    @_check_modified
     def team(self, team, simple=False):
         """
         Get data on a single specified team.
@@ -153,6 +177,7 @@ class TBA:
         """
         return Team(self._get('team/%s%s' % (self.team_key(team), '/simple' if simple else '')))
 
+    @_check_modified
     def team_events(self, team, year=None, simple=False, keys=False):
         """
         Get team events a team has participated in.
@@ -174,6 +199,7 @@ class TBA:
             else:
                 return [Event(raw) for raw in self._get('team/%s/events%s' % (self.team_key(team), '/simple' if simple else ''))]
 
+    @_check_modified
     def team_awards(self, team, year=None, event=None):
         """
         Get list of awards team has recieved.
@@ -191,6 +217,7 @@ class TBA:
             else:
                 return [Award(raw) for raw in self._get('team/%s/awards' % self.team_key(team))]
 
+    @_check_modified
     def team_matches(self, team, event=None, year=None, simple=False, keys=False):
         """
         Get list of matches team has participated in.
@@ -213,6 +240,7 @@ class TBA:
             else:
                 return [Match(raw) for raw in self._get('team/%s/matches/%s%s' % (self.team_key(team), year, '/simple' if simple else ''))]
 
+    @_check_modified
     def team_years(self, team):
         """
         Get years during which a team participated in FRC.
@@ -222,6 +250,7 @@ class TBA:
         """
         return self._get('team/%s/years_participated' % self.team_key(team))
 
+    @_check_modified
     def team_media(self, team, year=None, tag=None):
         """
         Get media for a given team.
@@ -233,6 +262,7 @@ class TBA:
         """
         return [Media(raw) for raw in self._get('team/%s/media%s%s' % (self.team_key(team), ('/tag/%s' % tag) if tag else '', ('/%s' % year) if year else ''))]
 
+    @_check_modified
     def team_robots(self, team):
         """
         Get data about a team's robots.
@@ -242,6 +272,7 @@ class TBA:
         """
         return [Robot(raw) for raw in self._get('team/%s/robots' % self.team_key(team))]
 
+    @_check_modified
     def team_districts(self, team):
         """
         Get districts a team has competed in.
@@ -251,6 +282,7 @@ class TBA:
         """
         return [District(raw) for raw in self._get('team/%s/districts' % self.team_key(team))]
 
+    @_check_modified
     def team_profiles(self, team):
         """
         Get team's social media profiles linked on their TBA page.
@@ -260,6 +292,7 @@ class TBA:
         """
         return [Profile(raw) for raw in self._get('team/%s/social_media' % self.team_key(team))]
 
+    @_check_modified
     def team_status(self, team, event):
         """
         Get status of a team at an event.
@@ -270,6 +303,7 @@ class TBA:
         """
         return Status(self._get('team/%s/event/%s/status' % (self.team_key(team), event)))
 
+    @_check_modified
     def events(self, year, simple=False, keys=False):
         """
         Get a list of events in a given year.
@@ -284,6 +318,7 @@ class TBA:
         else:
             return [Event(raw) for raw in self._get('events/%s%s' % (year, '/simple' if simple else ''))]
 
+    @_check_modified
     def event(self, event, simple=False):
         """
         Get basic information about an event.
@@ -296,6 +331,7 @@ class TBA:
         """
         return Event(self._get('event/%s%s' % (event, '/simple' if simple else '')))
 
+    @_check_modified
     def event_alliances(self, event):
         """
         Get information about alliances at event.
@@ -305,6 +341,7 @@ class TBA:
         """
         return [Alliance(raw) for raw in self._get('event/%s/alliances' % event)]
 
+    @_check_modified
     def event_district_points(self, event):
         """
         Get district point information about an event.
@@ -314,6 +351,7 @@ class TBA:
         """
         return DistrictPoints(self._get('event/%s/district_points' % event))
 
+    @_check_modified
     def event_insights(self, event):
         """
         Get insights about an event.
@@ -323,6 +361,7 @@ class TBA:
         """
         return Insights(self._get('event/%s/insights' % event))
 
+    @_check_modified
     def event_oprs(self, event):
         """
         Get OPRs from an event.
@@ -332,6 +371,7 @@ class TBA:
         """
         return OPRs(self._get('event/%s/oprs' % event))
 
+    @_check_modified
     def event_predictions(self, event):
         """
         Get predictions for matches during an event.
@@ -341,6 +381,7 @@ class TBA:
         """
         return Predictions(self._get('event/%s/predictions' % event))
 
+    @_check_modified
     def event_rankings(self, event):
         """
         Get rankings from an event.
@@ -350,6 +391,7 @@ class TBA:
         """
         return Rankings(self._get('event/%s/rankings' % event))
 
+    @_check_modified
     def event_teams(self, event, simple=False, keys=False):
         """
         Get list of teams at an event.
@@ -364,6 +406,7 @@ class TBA:
         else:
             return [Team(raw) for raw in self._get('event/%s/teams%s' % (event, '/simple' if simple else ''))]
 
+    @_check_modified
     def event_awards(self, event):
         """
         Get list of awards presented at an event.
@@ -373,6 +416,7 @@ class TBA:
         """
         return [Award(raw) for raw in self._get('event/%s/awards' % event)]
 
+    @_check_modified
     def event_matches(self, event, simple=False, keys=False):
         """
         Get list of matches played at an event.
@@ -387,6 +431,7 @@ class TBA:
         else:
             return [Match(raw) for raw in self._get('event/%s/matches%s' % (event, '/simple' if simple else ''))]
 
+    @_check_modified
     def match(self, key=None, year=None, event=None, type='qm', number=None, round=None, simple=False):
         """
         Get data on a match.
@@ -412,6 +457,7 @@ class TBA:
                                                                                               round=('m%s' % round) if not type == 'qm' else '',
                                                                                               simple='/simple' if simple else '')))
 
+    @_check_modified
     def districts(self, year):
         """
         Return a list of districts active.
@@ -421,6 +467,7 @@ class TBA:
         """
         return [District(raw) for raw in self._get('districts/%s' % year)]
 
+    @_check_modified
     def district_events(self, district, simple=False, keys=False):
         """
         Return list of events in a given district.
@@ -435,6 +482,7 @@ class TBA:
         else:
             return [Event(raw) for raw in self._get('district/%s/events%s' % (district, '/simple' if simple else ''))]
 
+    @_check_modified
     def district_rankings(self, district):
         """
         Return data about rankings in a given district.
@@ -444,6 +492,7 @@ class TBA:
         """
         return [DistrictRanking(raw) for raw in self._get('district/%s/rankings' % district)]
 
+    @_check_modified
     def district_teams(self, district, simple=False, keys=False):
         """
         Get list of teams in the given district.
