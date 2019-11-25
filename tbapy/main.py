@@ -30,6 +30,7 @@ class TBA:
         self.auth_secret = auth_secret
         self.event_key = event_key
         self.session.headers.update({'X-TBA-Auth-Key': auth_key, 'X-TBA-Auth-Id': auth_id})
+        self.if_modified_since = None
 
     def _get(self, url):
         """
@@ -38,7 +39,16 @@ class TBA:
         :param url: URL string to get data from.
         :return: Requested data in JSON format.
         """
-        raw = self.session.get(self.READ_URL_PRE + url).json()
+        extra_headers = {}
+        if self.if_modified_since is not None:
+            extra_headers['If-Modified-Since': self.if_modified_since]
+        
+        response = self.session.get(self.READ_URL_PRE + url, headers=extra_headers)
+        last_modified = response.headers.get('Last-Modified')
+        if response.status_code == 304 and last_modified is not None:
+            raise LastModifiedException(response.headers['Last-Modified'])
+
+        raw = response.json()
         self._detect_errors(raw)
         return raw
 
@@ -69,6 +79,12 @@ class TBA:
         errors = json.get('Errors')
         if errors is not None:
             raise TBAErrorList([error.popitem() for error in errors])
+
+    def _cache_response(func):
+        def wrapper(*args, **kwargs):
+
+            func(*args, **kwargs)
+        return wrapper
 
     @staticmethod
     def team_key(identifier):
