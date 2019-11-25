@@ -38,9 +38,9 @@ class TBA:
         :param url: URL string to get data from.
         :return: Requested data in JSON format.
         """
-        raw_json = self.session.get(self.READ_URL_PRE + url).json()
-        self._detect_errors(raw_json)
-        return raw_json
+        raw = self.session.get(self.READ_URL_PRE + url).json()
+        self._detect_errors(raw)
+        return raw
 
     def _post(self, url, data):
         """
@@ -51,9 +51,16 @@ class TBA:
         :return: Requests Response object.
 
         """
-        raw_json = self.session.post(self.WRITE_URL_PRE + url % self.event_key, data=data, headers={'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url % self.event_key + data).encode('utf-8')).hexdigest()})
-        self._detect_errors(raw_json)
-        return raw_json
+        raw = self.session.post(
+            self.WRITE_URL_PRE + url % self.event_key, 
+            data=data, 
+            headers={
+                'X-TBA-Auth-Sig': md5((self.auth_secret + '/api/trusted/v1/' + url % self.event_key + data).encode('utf-8')).hexdigest()
+            }
+        )
+
+        self._detect_errors(raw)
+        return raw
 
     def _detect_errors(self, json):
         if not isinstance(json, dict):
