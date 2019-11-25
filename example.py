@@ -1,4 +1,5 @@
 import tbapy
+import datetime
 
 # This key should ONLY be used for this example. If using this library in your own project,
 # follow the steps in the README to generate your own key.
@@ -7,10 +8,10 @@ tba = tbapy.TBA('TjUTfbPByPvqcFaMdEQVKPsd8R4m2TKIVHMoqf3Vya0kAdqx3DlwDQ5Sly4N2xJ
 team = tba.team(254)
 districts = tba.team_districts(1418)
 match = tba.match(year=2017,
-                  event='chcmp',
-                  type='sf',
-                  number=2,
-                  round=1)
+                event='chcmp',
+                type='sf',
+                number=2,
+                round=1)
 events = tba.team_events(148, 2016)
 robots = tba.team_robots(4131)
 
@@ -42,3 +43,22 @@ print('In 2016, team 148 was in %d events: %s.' % (len(events), ', '.join(event.
 print('Team 4131\'s robots: ' + ', '.join('%s (%d)' % (robot.raw()['robot_name'], robot.raw()['year']) for robot in robots))
 print('Robots have attribute name:', 'name' in robots[0].raw())
 print('Robots have attribute robot_name:', 'robot_name' in robots[0].raw())
+
+print('If-Modified-Since Header usage.')
+def fetch_cached_value():
+    return [tbapy.District({
+        'city': 'Falls Church',
+        'state_prov': 'Virginia',
+        'country': 'USA',
+        'cached': 'cached?'
+    })]
+
+date_string_today = datetime.datetime.strftime(datetime.datetime.now(), '%a, %d %b %Y %H:%M:%S GMT')
+
+date_old = datetime.datetime.now().replace(year=2015)
+date_string_old = datetime.datetime.strftime(date_old, '%a, %d %b %Y %H:%M:%S GMT')
+
+districts = tba.team_districts(1418, if_modified_since=date_string_today) or fetch_cached_value()
+print(f'Was the cached value used? {districts[0].get("cached") is not None}')
+districts = tba.team_districts(1418, if_modified_since=date_string_old) or fetch_cached_value()
+print(f'Was the cached value used? {districts[0].get("cached") is not None}')
