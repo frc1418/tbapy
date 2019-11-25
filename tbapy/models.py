@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 class _base_model_class(dict):
     def __init__(self, json={}):
         self.update(json)
@@ -35,3 +38,12 @@ Prediction = _model_class('Prediction')
 Rankings = _model_class('Rankings')
 DistrictRanking = _model_class('DistrictRanking')
 Status = _model_class('Status')
+
+
+class LastModifiedDate:
+    def __init__(self, date_string):
+        self.date_string = date_string
+        self.date = datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S GMT')
+
+    def __bool__(self):
+        return False

@@ -5,6 +5,8 @@ from hashlib import md5
 from .models import *
 from .exceptions import *
 from cachecontrol import CacheControl
+from datetime import datetime
+import time
 
 
 class TBA:
@@ -33,6 +35,7 @@ class TBA:
         self.event_key = event_key
         self.session.headers.update({'X-TBA-Auth-Key': auth_key, 'X-TBA-Auth-Id': auth_id})
         self._if_modified_since = None
+        self._last_modified = False
 
     def _get(self, url):
         """
@@ -44,11 +47,16 @@ class TBA:
         extra_headers = {}
         if self._if_modified_since is not None:
             extra_headers['If-Modified-Since'] = self._if_modified_since
-        
+
         response = self.session.get(self.READ_URL_PRE + url, headers=extra_headers)
         last_modified = response.headers.get('Last-Modified')
-        if response.status_code == 304 and last_modified is not None:
-            raise NotModifiedException(response.headers['Last-Modified'])
+        
+        if last_modified is not None:
+            if response.status_code == 304:
+                raise NotModifiedException(response.headers['Last-Modified'])
+
+            if self._last_modified:
+                self._last_modified = LastModifiedDate(last_modified)
 
         raw = response.json()
         self._detect_errors(raw)
@@ -84,15 +92,42 @@ class TBA:
 
     def _check_modified(func):
         @functools.wraps(func)
-        def wrapper(self, *args, if_modified_since=None, silent=True, **kwargs):
-            self._if_modified_since = if_modified_since
-            try: 
-                return func(self, *args, **kwargs)
+        def wrapper(self, *args, last_modified=False, if_modified_since=None, silent=True, **kwargs):
+            self._if_modified_since = if_modified_since and datetime.strftime(if_modified_since, '%a, %d %b %Y %H:%M:%S GMT')
+            self._last_modified = last_modified
+
+            if last_modified or if_modified_since:
+                self.cache = False
+
+            try:
+                output = func(self, *args, **kwargs)
+                if last_modified:
+                    return output, self._last_modified
+                return output
             except NotModifiedException as e:
                 if not silent:
                     raise e from None
                 return e.last_modified
+            finally:
+                self.cache = True
+
         return wrapper
+
+    @property
+    def cache(self):
+        for adapter in self.session.adapters.values():
+            if 'GET' in adapter.cacheable_methods:
+                return True
+
+        return False
+
+    @cache.setter
+    def cache(self, on):
+        for adapter in self.session.adapters.values():
+            if on:
+                adapter.cacheable_methods = ('GET',)
+            else:
+                adapter.cacheable_methods = ()
 
     @staticmethod
     def team_key(identifier):
