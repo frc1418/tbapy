@@ -6,7 +6,7 @@ import datetime
 tba = tbapy.TBA('TjUTfbPByPvqcFaMdEQVKPsd8R4m2TKIVHMoqf3Vya0kAdqx3DlwDQ5Sly4N2xJS')
 
 team = tba.team(254)
-districts = tba.team_districts(1418)
+districts, last_modified = tba.team_districts(1418, last_modified=True)
 match = tba.match(year=2017,
                 event='chcmp',
                 type='sf',
@@ -43,8 +43,9 @@ print('In 2016, team 148 was in %d events: %s.' % (len(events), ', '.join(event.
 print('Team 4131\'s robots: ' + ', '.join('%s (%d)' % (robot.raw()['robot_name'], robot.raw()['year']) for robot in robots))
 print('Robots have attribute name:', 'name' in robots[0].raw())
 print('Robots have attribute robot_name:', 'robot_name' in robots[0].raw())
+print()
 
-print('If-Modified-Since Header usage.')
+print('-' * 8 + ' If-Modified-Since Header ' + '-' * 8)
 def fetch_cached_value():
     return [tbapy.District({
         'city': 'Falls Church',
@@ -53,12 +54,9 @@ def fetch_cached_value():
         'cached': 'cached?'
     })]
 
-date_string_today = datetime.datetime.strftime(datetime.datetime.now(), '%a, %d %b %Y %H:%M:%S GMT')
-
-date_old = datetime.datetime.now().replace(year=2015)
-date_string_old = datetime.datetime.strftime(date_old, '%a, %d %b %Y %H:%M:%S GMT')
-
-districts = tba.team_districts(1418, if_modified_since=date_string_today) or fetch_cached_value()
-print(f'Was the cached value used? {districts[0].get("cached") is not None}')
-districts = tba.team_districts(1418, if_modified_since=date_string_old) or fetch_cached_value()
-print(f'Was the cached value used? {districts[0].get("cached") is not None}')
+date_last = last_modified.date
+date_old = datetime.datetime.utcnow().replace(year=2015)
+districts = tba.team_districts(1418, if_modified_since=date_last) or fetch_cached_value()
+print(f'Recent date -- Was the cached value used? {districts[0].get("cached") is not None}')
+districts = tba.team_districts(1418, if_modified_since=date_old) or fetch_cached_value()
+print(f'Old date -- Was the cached value used? {districts[0].get("cached") is not None}')
