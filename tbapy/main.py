@@ -315,15 +315,29 @@ class TBA:
         return [Profile(raw) for raw in self._get('team/%s/social_media' % self.team_key(team))]
 
     @_check_modified
-    def team_status(self, team, event):
+    def team_status(self, team=None, event=None, year=None):
         """
         Get status of a team at an event.
 
         :param team: Team whose status to get.
         :param event: Event team is at.
+        :param year: Year of events to return.
         :return: Status object.
         """
-        return Status(self._get('team/%s/event/%s/status' % (self.team_key(team), event)))
+        if event:
+            if team:
+                return Status(self._get('team/%s/event/%s/status' % (self.team_key(team), event)))
+            else:
+                return [Status(raw) for raw in self._get('event/%s/teams/statuses' % (event))]
+        else:
+            if year:
+                if team:
+                    return [Status(raw) for raw in self._get('team/%s/events/%s/statuses' % (self.team_key(team), year))]
+                else:
+                    return ValueError('Team must be specified if year is specified.')
+            else:
+                raise ValueError("Must specify either event or year.")
+
 
     @_check_modified
     def events(self, year, simple=False, keys=False):
