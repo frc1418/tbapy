@@ -327,16 +327,12 @@ class TBA:
         if event:
             if team:
                 return Status(self._get('team/%s/event/%s/status' % (self.team_key(team), event)))
-            else:
-                return [Status(raw) for raw in self._get('event/%s/teams/statuses' % (event))]
-        else:
-            if year:
-                if team:
-                    return [Status(raw) for raw in self._get('team/%s/events/%s/statuses' % (self.team_key(team), year))]
-                else:
-                    return ValueError('Team must be specified if year is specified.')
-            else:
-                raise ValueError("Must specify either event or year.")
+            return [Status(raw) for raw in self._get('event/%s/teams/statuses' % (event))]
+        if year:
+            if team:
+                return [Status(raw) for raw in self._get('team/%s/events/%s/statuses' % (self.team_key(team), year))]
+            raise ValueError('Team must be specified if year is specified.')
+        raise ValueError('Must specify either event or year.')
 
 
     @_check_modified
