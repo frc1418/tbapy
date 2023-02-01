@@ -20,7 +20,7 @@ Before using the library, you must instantiate its class, for example:
 tba = tbapy.TBA('key')
 ```
 
-The Blue Alliance's API requires that all applications identify themselves with an auth key when retrieving data. To obtain an auth key, visit TBA's [Account page](https://www.thebluealliance.com/account).
+The Blue Alliance's API requires that all applications identify themselves with an auth key when retrieving data. To obtain an auth key, visit TBA's [Account page](https://www.thebluealliance.com/account). The auth key can also be set via the `TBA_AUTH_KEY` environment variable.
 
 
 ## Retrieval Functions

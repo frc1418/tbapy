@@ -7,6 +7,7 @@ from .exceptions import *
 from cachecontrol import CacheControl
 from datetime import datetime
 import time
+import os
 
 
 class TBA:
@@ -22,15 +23,19 @@ class TBA:
     auth_secret = ''
     event_key = ''
 
-    def __init__(self, auth_key, auth_id='', auth_secret='', event_key=''):
+    def __init__(self, auth_key='', auth_id='', auth_secret='', event_key=''):
         """
         Store auth key so we can reuse it as many times as we make a request.
 
-        :param auth_key: Your application authorization key, obtainable at https://www.thebluealliance.com/account.
+        :param auth_key: Your application authorization key, obtainable at https://www.thebluealliance.com/account
         :param auth_id: Your event authorization ID, obtainable at https://www.thebluealliance.com/request/apiwrite
         :param auth_secret: Your event authorization secret, obtainable at https://www.thebluealliance.com/request/apiwrite
         :param event_key: The event key that is linked to the ID and secret provided.
         """
+
+        if not auth_key:
+            auth_key = os.environ["TBA_AUTH_KEY"]
+
         self.auth_secret = auth_secret
         self.event_key = event_key
         self.session.headers.update({'X-TBA-Auth-Key': auth_key, 'X-TBA-Auth-Id': auth_id})
