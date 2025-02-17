@@ -539,6 +539,46 @@ class TBA:
         else:
             return [Team(raw) for raw in self._get('district/%s/teams' % district)]
 
+    @_check_modified
+    def district_history(self, abbreviation):
+        """
+        Return all District objects associated with a given district abbreviation.
+
+        :param district: Abbreviation of district to get rankings of, e.g. 'ne' or 'fim'.
+        :return: List of District objects.
+        """
+        return [District(raw) for raw in self._get('district/%s/history' % abbreviation)]
+
+    @_check_modified
+    def district_awards(self, district):
+        """
+        Get list of awards presented in a single district year.
+
+        :param district: District key to get awards from.
+        :return: List of Award objects.
+        """
+        return [Award(raw) for raw in self._get('district/%s/awards' % district)]
+
+    @_check_modified
+    def insights_leaderboards(self, year):
+        """
+        Get list of leaderboard insights for a given year. Use year=0 for overall.
+
+        :param year: Year to get leaderboards insights from.
+        :return: List of InsightLeaderboard objects.
+        """
+        return [InsightLeaderboard(raw) for raw in self._get('insights/leaderboards/%s' % year)]
+    
+    @_check_modified
+    def insights_notables(self, year):
+        """
+        Get list of notable insights for a given year. Use year=0 for overall.
+
+        :param year: Year to get notable insights from.
+        :return: List of InsightNotable objects.
+        """
+        return [InsightNotable(raw) for raw in self._get('insights/notables/%s' % year)]
+
     def update_trusted(self, auth_id, auth_secret, event_key):
         """
         Set Trusted API ID and Secret and the event key they are assigned to.
