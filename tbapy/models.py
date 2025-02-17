@@ -38,7 +38,8 @@ Predictions = _model_class('Predictions')
 Rankings = _model_class('Rankings')
 DistrictRanking = _model_class('DistrictRanking')
 Status = _model_class('Status')
-
+InsightLeaderboard = _model_class('InsightLeaderboard')
+InsightNotable = _model_class('InsightNotable')
 
 class LastModifiedDate:
     def __init__(self, date_string):

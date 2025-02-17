@@ -55,6 +55,11 @@ Some requests support `year` and other optional parameters, which are recommende
 * `tba.district_events(district, [simple/keys])` - Get list of events in a district.
 * `tba.district_rankings(district)` - Get the rankings in a district.
 * `tba.district_teams(district, [simple/keys])` - Get a list of the teams in a district.
+* `tba.district_history(abbreviation)` - Get a list of districts associated with the given abbreviation (e.g. `'fim'`).
+* `tba.district_awards(district)` - Get a list of awards in a district.
+* `tba.insights_leaderboards(year)` - Get a list of leaderboard insights in the given year. Use year=0 for overall.
+* `tba.insights_notables(year)` - Get a list of notable insights in the given year. Use year=0 for overall.
+
 
 See `example.py` for several usage examples.
 
